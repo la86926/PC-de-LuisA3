@@ -1238,7 +1238,7 @@ body.workspace-open{overflow:hidden}
 <!-- ======================= MÉTODO ======================= -->
 <section class="view" id="v-method">
  <div class="reading">
-  <h1>El Método PC</h1>
+  <h1>El Método PC 2</h1>
   <p class="lead">La idea es sencilla y exigente: resolver un mismo conjunto de ejercicios una y otra vez, cada vez más rápido, hasta que el reconocimiento de patrones se vuelva automático.</p>
 
   <p>El nombre viene del PC (<em>wp</em>): golpe tras golpe sobre el mismo punto. En esta versión, ese «mismo punto» son los patrones posicionales que se repiten —estructuras de peones, casillas débiles, piezas mal ubicadas, rupturas y cambios favorables— y la repetición deliberada es lo que los graba en la memoria.</p>
@@ -1410,7 +1410,7 @@ body.workspace-open{overflow:hidden}
   <section class="workspace-shell plan-shell" role="dialog" aria-modal="true" aria-labelledby="plan-title">
     <header class="workspace-topbar">
       <div>
-        <span class="workspace-eyebrow">EL MÉTODO PC</span>
+        <span class="workspace-eyebrow">EL MÉTODO PC 2</span>
         <h2 id="plan-title">Tu entrenamiento</h2>
         <p>Continúa con intención, repasa tus errores y cumple una meta posible cada día.</p>
       </div>
@@ -4738,7 +4738,7 @@ async function compartirLogro(){
     ctx.textAlign='center';
     ctx.font='120px serif'; ctx.fillText('🏆',W/2,260);
     ctx.fillStyle='#ece6d8'; ctx.font='600 64px Georgia';
-    ctx.fillText('El Método PC',W/2,390);
+    ctx.fillText('El Método PC 2',W/2,390);
     ctx.fillStyle='#d9a441'; ctx.font='700 150px Georgia';
     ctx.fillText(solved.size,W/2,590);
     ctx.fillStyle='#ece6d8'; ctx.font='500 52px Georgia';
@@ -4762,7 +4762,7 @@ async function compartirLogro(){
 
     
     if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
-      await navigator.share({files:[archivo],title:'Mi progreso',text:'Mi progreso en El Método PC ♟️'});
+      await navigator.share({files:[archivo],title:'Mi progreso',text:'Mi progreso en El Método PC 2 ♟️'});
     }else{
       descargarBlob(blob,'logro-wp.png');
       setStatus('ok','Tarjeta descargada, lista para compartir.');
@@ -5178,7 +5178,7 @@ async function compartirTablero(){
       await navigator.share({
         files:[archivo],
         title:'Ejercicio '+curr().n,   // CAMBIO
-        text:'Comparto esta posición desde El Método PC.'
+        text:'Comparto esta posición desde El Método PC 2.'
       });
       
       
