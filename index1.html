@@ -1161,7 +1161,7 @@ body.workspace-open{overflow:hidden}
 <!-- ======================= MÉTODO ======================= -->
 <section class="view" id="v-method">
  <div class="reading">
-  <h1>El Método PC</h1>
+  <h1>El Método PC 1</h1>
   <p class="lead">La idea es sencilla y exigente: resolver un mismo conjunto de ejercicios una y otra vez, cada vez más rápido, hasta que el reconocimiento de patrones se vuelva automático.</p>
 
   <p>El nombre viene del PC (<em>wp</em>): golpe tras golpe sobre el mismo punto. En táctica, ese «mismo punto» son los motivos que se repiten —clavadas, horquillas, desviaciones, mates de la última fila— y la repetición deliberada es lo que los graba en la memoria.</p>
@@ -1217,7 +1217,7 @@ body.workspace-open{overflow:hidden}
 
 
 <footer>
-  Material: <em>WPMethod (Método PC)</em> · AS &amp; nss. Entrenador interactivo en español ·
+  Material: <em>WPMethod (Método PC 1)</em> · AS &amp; nss. Entrenador interactivo en español ·
   motor de legalidad <a href="https://github.com/jhlywa/chess.js">chess.js</a>. Sitio hecho por LA.
 </footer>
 
@@ -4627,7 +4627,7 @@ function compartirLogro(){
     }).then(function(blob){
       const archivo=new File([blob],'logro-woodpecker.png',{type:'image/png'});
       if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
-        return navigator.share({files:[archivo],title:'Mi progreso',text:'Mi progreso en El Método PC ♟️'});
+        return navigator.share({files:[archivo],title:'Mi progreso',text:'Mi progreso en El Método PC 1 ♟️'});
       }
       descargarBlob(blob,'logro-woodpecker.png');
       setStatus('ok','Tarjeta descargada, lista para compartir.');
@@ -5046,7 +5046,7 @@ function compartirTablero(){
     }
     const archivo=new File([blob],nombre,{type:'image/png'});
     if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
-      return navigator.share({files:[archivo],title:'Ejercicio '+curr().n,text:'Comparto esta posición desde El Método PC.'})
+      return navigator.share({files:[archivo],title:'Ejercicio '+curr().n,text:'Comparto esta posición desde El Método PC 1.'})
         .then(function(){setStatus('ok','Compartí la imagen del tablero.');});
     }
     descargarBlob(blob,nombre);
