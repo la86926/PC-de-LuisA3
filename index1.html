@@ -7724,8 +7724,12 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
     }
     return aHex(mezcla(base,hacia,0.8));
   }
+  /* La transparencia se resuelve contra blanco y se guarda el color sólido
+     resultante: así el hexadecimal que ves es exactamente el color del tablero,
+     y el tablero no cambia con el modo por dejar ver el fondo de la interfaz. */
+  function plano(c){ return sobre(c,BLANCO); }
   function paqueteEfectivo(cl,cd,trama){
-    var f=fondoDelTablero(), el=sobre(cl,f), ed=sobre(cd,f);
+    var el=plano(cl), ed=plano(cd);
     var esPapel = trama==='periodico';
     var hl = esPapel ? 'rgba(201,201,106,.55)' : (tonoCalido(ed) ? 'rgba(58,96,208,.32)' : 'rgba(255,206,61,.46)');
     var co1, co2;
@@ -7741,7 +7745,7 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
     var atc=acentoTexto(ed,BLANCO,NEGRO);
     var ato=acentoTexto(ed,{r:33,g:43,b:37,a:1},BLANCO);
     var marco=aHex(mezcla(el,ed,0.14));
-    return [aTexto(cl),aTexto(cd),co1,co2,hl,(trama||''),acen,tinta,halo,atc,ato,marco].join('|');
+    return [aHex(el),aHex(ed),co1,co2,hl,(trama||''),acen,tinta,halo,atc,ato,marco].join('|');
   }
 
   /* ---------- estado ---------- */
@@ -7771,6 +7775,26 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
 
   /* la clave guardada se valida contra la lista completa: propios + los 115 */
   if(tema!=='personalizado' && !temaPorClave(tema)) tema='cielo';
+
+  /* lo guardado antes con transparencia se recalcula a color sólido una sola vez */
+  function migrarTablero(t){
+    if(!t || (String(t.l).indexOf('rgba')<0 && String(t.d).indexOf('rgba')<0)) return false;
+    var cl=leerColor(t.l), cd=leerColor(t.d);
+    if(!cl||!cd) return false;
+    var p=paqueteEfectivo(cl,cd,t.t).split('|');
+    t.l=p[0]; t.d=p[1]; t.cl=p[2]; t.cd=p[3]; t.hl=p[4];
+    t.ac=p[6]; t.ai=p[7]; t.halo=p[8]; t.atc=p[9]; t.ato=p[10]; t.marco=p[11];
+    return true;
+  }
+  (function(){
+    var cambio=false, i;
+    for(i=0;i<mios.length;i++) if(migrarTablero(mios[i])) cambio=true;
+    if(cambio) guardar(K_MIOS, JSON.stringify(mios));
+    if(perso && perso.indexOf('rgba')>=0){
+      var a=perso.split('|'), c1=leerColor(a[0]), c2=leerColor(a[1]);
+      if(c1&&c2){ perso=paqueteEfectivo(c1,c2,a[5]||''); guardar(K_PER,perso); }
+    }
+  })();
 
   function esFav(k){ return favs.indexOf(k)>=0; }
   function persoComoTema(){
@@ -7998,9 +8022,9 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
     var cont=document.getElementById('pc-sl-'+cara);
     if(cont) for(var i=0;i<CANALES.length;i++){ var f=cont['ref_'+CANALES[i][0]]; if(f) f(); }
     var chip=document.getElementById('pc-chip-'+cara);
-    if(chip) chip.style.background=aTexto(borrador[cara]);
+    if(chip) chip.style.background=aHex(plano(borrador[cara]));
     var hx=document.getElementById('pc-hex-'+cara);
-    if(hx && document.activeElement!==hx){ hx.value=aHex(borrador[cara]).replace('#',''); hx.classList.remove('mal'); }
+    if(hx && document.activeElement!==hx){ hx.value=aHex(plano(borrador[cara])).replace('#',''); hx.classList.remove('mal'); }
     pintarPrevia();
   }
   function pintarPrevia(){
@@ -8020,12 +8044,12 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
       }catch(e){}
     }
     if(borrador.trama){ p.setAttribute('data-trama',borrador.trama); } else { p.removeAttribute('data-trama'); }
-    p.style.setProperty('--light', aTexto(borrador.l));
-    p.style.setProperty('--dark', aTexto(borrador.d));
+    p.style.setProperty('--light', aHex(plano(borrador.l)));
+    p.style.setProperty('--dark', aHex(plano(borrador.d)));
     var papel = borrador.trama==='periodico';
     for(var j=0;j<16;j++){
       var fila=Math.floor(j/4), col=j%4, claro=((fila+col)%2===0);
-      p.childNodes[j].style.backgroundColor = aTexto((claro||papel)? borrador.l : borrador.d);
+      p.childNodes[j].style.backgroundColor = aHex(plano((claro||papel)? borrador.l : borrador.d));
     }
   }
   var nombreOk=false;
@@ -8089,10 +8113,10 @@ $('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_b
       var c=leerColor(hx.value);
       if(c){
         hx.classList.remove('mal');
-        c.a=borrador[cara].a;
+        c.a=1;
         borrador[cara]=c;
         var chip=document.getElementById('pc-chip-'+cara);
-        if(chip) chip.style.background=aTexto(c);
+        if(chip) chip.style.background=aHex(c);
         var cont=document.getElementById('pc-sl-'+cara);
         if(cont) for(var i=0;i<CANALES.length;i++){ var f=cont['ref_'+CANALES[i][0]]; if(f) f(); }
         pintarPrevia();
