@@ -1,0 +1,93 @@
+name: Sync backup and build PajaritoC
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-backup-and-build-pajaritoc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch verified source
+        run: |
+          git clone --depth=1 https://github.com/la86926/PC-de-LuisA3-borrador.git /tmp/pc-source
+
+      - name: Apply verified web and Android files
+        run: |
+          cp /tmp/pc-source/index1.html index1.html
+          cp /tmp/pc-source/index2.html index2.html
+          rm -rf android-app
+          cp -R /tmp/pc-source/android-app android-app
+          mkdir -p .github/workflows
+          cp /tmp/pc-source/.github/workflows/build-pajaritoc-apk.yml .github/workflows/build-pajaritoc-apk.yml
+
+      - name: Verify backup implementation
+        run: |
+          grep -q 'id="b-backup-export"' index1.html
+          grep -q 'id="b-backup-import"' index1.html
+          grep -q 'backupImplementation:3' index1.html
+          grep -q '__pc_backup_pending_v3' index1.html
+          grep -q 'id="b-backup-export"' index2.html
+          grep -q 'id="b-backup-import"' index2.html
+          grep -q 'backupImplementation:3' index2.html
+          grep -q '__pc_backup_pending_v3' index2.html
+          grep -q 'android:label="PajaritoC"' android-app/app/src/main/AndroidManifest.xml
+          grep -q 'android:icon="@drawable/torre"' android-app/app/src/main/AndroidManifest.xml
+          grep -q "applicationId 'com.luis.pajaritoc'" android-app/app/build.gradle
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Prepare offline web assets
+        run: |
+          mkdir -p android-app/app/src/main/assets
+          mkdir -p android-app/app/src/main/res/drawable
+          cp index.html index1.html index2.html android-app/app/src/main/assets/
+          cp -f *.png android-app/app/src/main/assets/ || true
+          cp -f *.mp3 android-app/app/src/main/assets/ || true
+          cp -f *.js android-app/app/src/main/assets/ || true
+          cp -f *.wasm android-app/app/src/main/assets/ || true
+          cp torre.png android-app/app/src/main/res/drawable/torre.png
+
+      - name: Build PajaritoC APK
+        working-directory: android-app
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Prepare and inspect APK
+        run: |
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk PajaritoC.apk
+          test -s PajaritoC.apk
+          sha256sum PajaritoC.apk | tee PajaritoC.sha256
+          echo 'APK generated:'
+          ls -lh PajaritoC.apk
+
+      - name: Commit production files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index1.html index2.html android-app .github/workflows/build-pajaritoc-apk.yml
+          git diff --cached --quiet || git commit -m "Aplicar copia de seguridad corregida y Android PajaritoC"
+          git push origin HEAD:main
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PajaritoC
+          path: PajaritoC.apk
+          if-no-files-found: error
+          retention-days: 30
