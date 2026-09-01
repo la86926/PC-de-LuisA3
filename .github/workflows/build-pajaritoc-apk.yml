@@ -16,13 +16,41 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Disable one-click unique moves
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          changed = []
+          old = 'var PC_JUGADA_UNICA = true;'
+          new = 'var PC_JUGADA_UNICA = false;'
+          for name in ('index1.html', 'index2.html'):
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+              if old in text:
+                  p.write_text(text.replace(old, new), encoding='utf-8')
+                  changed.append(name)
+          print('Changed:', ', '.join(changed) if changed else 'none')
+          PY
+
+      - name: Commit interaction change
+        run: |
+          if git diff --quiet -- index1.html index2.html; then
+            echo "No source change needed"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index1.html index2.html
+            git commit -m "Use two-click interaction for unique moves"
+            git push
+          fi
 
       - uses: actions/setup-java@v4
         with:
