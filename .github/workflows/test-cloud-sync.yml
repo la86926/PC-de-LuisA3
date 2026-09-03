@@ -24,7 +24,7 @@ jobs:
         run: |
           URL='https://la86926.github.io/PC-de-LuisA3/'
           for i in $(seq 1 30); do
-            if curl -fsSL "$URL" | grep -Fq 'pc-cloud-sync.js?v=1'; then
+            if curl -fsSL "$URL" | grep -Fq 'pc-cloud-sync.js?v=2'; then
               echo 'Pages actualizado.'
               exit 0
             fi
@@ -35,10 +35,10 @@ jobs:
 
       - name: Verify Firebase anonymous auth and Firestore rules
         env:
-          FIREBASE_API_KEY: AIzaSyCGcl98D7288m_iy0Wlc_ffTISg85-LVpw
+          FIREBASE_API_KEY: AIzaSyCGcl98D7288m_iyOWlc_ffTISg85-LVpw
         run: |
           set -euo pipefail
-          AUTH_JSON=$(curl -fsS -X POST -H 'Content-Type: application/json' --data '{"returnSecureToken":true}' "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}")
+          AUTH_JSON=$(curl -fsS -X POST -H 'Content-Type: application/json' -H 'Origin: https://la86926.github.io' --data '{"returnSecureToken":true}' "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}")
           TOKEN=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["idToken"])' <<< "$AUTH_JSON")
           TEST_ID="syncsystemtest$(date +%s)"
           TS=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
