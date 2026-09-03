@@ -1,0 +1,75 @@
+name: Test cloud sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/test-cloud-sync.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check pc-frame-cloud-bridge.js
+          node --check pc-cloud-sync.js
+
+      - name: Wait for GitHub Pages
+        run: |
+          URL='https://la86926.github.io/PC-de-LuisA3/'
+          for i in $(seq 1 30); do
+            if curl -fsSL "$URL" | grep -Fq 'pc-cloud-sync.js?v=1'; then
+              echo 'Pages actualizado.'
+              exit 0
+            fi
+            sleep 4
+          done
+          echo 'GitHub Pages no se actualizo a tiempo.' >&2
+          exit 1
+
+      - name: Verify Firebase anonymous auth and Firestore rules
+        env:
+          FIREBASE_API_KEY: AIzaSyCGcl98D7288m_iy0Wlc_ffTISg85-LVpw
+        run: |
+          set -euo pipefail
+          AUTH_JSON=$(curl -fsS -X POST -H 'Content-Type: application/json' --data '{"returnSecureToken":true}' "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}")
+          TOKEN=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["idToken"])' <<< "$AUTH_JSON")
+          TEST_ID="syncsystemtest$(date +%s)"
+          TS=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          DOC_URL="https://firestore.googleapis.com/v1/projects/chess86926/databases/(default)/documents/progresos/${TEST_ID}"
+          BODY=$(cat <<JSON
+          {
+            "fields": {
+              "l1": {"mapValue": {"fields": {"storage": {"mapValue": {"fields": {}}}, "page": {"mapValue": {"fields": {}}}}}},
+              "l2": {"mapValue": {"fields": {"storage": {"mapValue": {"fields": {}}}, "page": {"mapValue": {"fields": {}}}}}},
+              "timestamp": {"timestampValue": "${TS}"},
+              "updatedBy": {"stringValue": "github-actions-test"},
+              "schemaVersion": {"integerValue": "1"}
+            }
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H "Authorization: Bearer ${TOKEN}" -H 'Content-Type: application/json' --data "$BODY" "$DOC_URL" >/tmp/firestore-create.json
+          curl -fsS -H "Authorization: Bearer ${TOKEN}" "$DOC_URL" >/tmp/firestore-get.json
+          grep -Fq 'github-actions-test' /tmp/firestore-get.json
+          curl -fsS -X DELETE -H "Authorization: Bearer ${TOKEN}" "$DOC_URL" >/dev/null
+          echo 'Firebase y reglas Firestore correctos.'
+
+      - name: Verify sync UI in browser
+        run: |
+          set -e
+          BROWSER=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
+          if [ -z "$BROWSER" ]; then
+            echo 'No hay Chrome en el runner; omitiendo prueba visual.'
+            exit 0
+          fi
+          timeout 45s "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom 'https://la86926.github.io/PC-de-LuisA3/' > /tmp/dom.html 2>/tmp/chrome.log || true
+          grep -Fq 'pc-sync-code-input' /tmp/dom.html
+          grep -Fq 'Un solo código guardará PC de L1 y PC de L2.' /tmp/dom.html
+          echo 'Interfaz de sincronizacion cargada correctamente.'
