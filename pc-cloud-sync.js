@@ -5,7 +5,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCGcl98D7288m_iy0Wlc_ffTISg85-LVpw',
+  apiKey: 'AIzaSyCGcl98D7288m_iyOWlc_ffTISg85-LVpw',
   authDomain: 'chess86926.firebaseapp.com',
   projectId: 'chess86926',
   storageBucket: 'chess86926.firebasestorage.app',
@@ -159,7 +159,7 @@ function injectBridge(frame){
     if(!docu||!docu.head||docu.getElementById('pc-cloud-frame-bridge'))return;
     const script=docu.createElement('script');
     script.id='pc-cloud-frame-bridge';
-    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=1';
+    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=2';
     docu.head.appendChild(script);
   }catch(e){}
 }
