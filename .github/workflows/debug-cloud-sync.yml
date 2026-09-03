@@ -21,7 +21,8 @@ jobs:
           set +e
           REPORT=.cloud-debug-report.txt
           : > "$REPORT"
-          AUTH_STATUS=$(curl -sS -o /tmp/auth.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data '{"returnSecureToken":true}' "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}")
+          COMMON=(-H 'Content-Type: application/json' -H 'Origin: https://la86926.github.io' -H 'Referer: https://la86926.github.io/PC-de-LuisA3/')
+          AUTH_STATUS=$(curl -sS -o /tmp/auth.json -w '%{http_code}' -X POST "${COMMON[@]}" --data '{"returnSecureToken":true}' "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}")
           echo "auth_status=${AUTH_STATUS}" >> "$REPORT"
           python3 - <<'PY' >> "$REPORT"
           import json
@@ -65,5 +66,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .cloud-debug-report.txt
-          git commit -m "test: add Firebase sync diagnosis" || exit 0
+          git commit -m "test: update Firebase sync diagnosis" || exit 0
           git push
