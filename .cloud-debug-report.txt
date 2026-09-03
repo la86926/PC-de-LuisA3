@@ -1,2 +1,0 @@
-auth_status=400
-auth_error=API key not valid. Please pass a valid API key.
