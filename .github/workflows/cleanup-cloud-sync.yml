@@ -1,0 +1,38 @@
+name: Cleanup cloud sync temp files
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/cleanup-cloud-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove temporary inspection and test files
+        run: |
+          rm -f \
+            .github/workflows/inspect-sync-storage.yml \
+            .github/workflows/inspect-sync-runtime.yml \
+            .github/workflows/integrate-cloud-sync.yml \
+            .github/workflows/test-cloud-sync.yml \
+            .github/workflows/debug-cloud-sync.yml \
+            .github/workflows/find-firebase-key.yml \
+            .github/workflows/fix-firebase-key.yml \
+            .github/workflows/cleanup-cloud-sync.yml \
+            .sync-storage-report.txt \
+            .sync-runtime-report.txt \
+            .cloud-debug-report.txt \
+            .firebase-key-report.txt
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: remove temporary cloud sync test files" || exit 0
+          git push
