@@ -10,6 +10,7 @@ on:
       - '*.png'
       - '*.mp3'
       - '*.js'
+      - '*.css'
       - '*.wasm'
       - 'android-app/**'
       - '.github/workflows/build-pajaritoc-apk.yml'
@@ -71,16 +72,28 @@ jobs:
           cp -f *.png android-app/app/src/main/assets/ || true
           cp -f *.mp3 android-app/app/src/main/assets/ || true
           cp -f *.js android-app/app/src/main/assets/ || true
+          cp -f *.css android-app/app/src/main/assets/ || true
           cp -f *.wasm android-app/app/src/main/assets/ || true
           cp torre.png android-app/app/src/main/res/drawable/torre.png
+
+      - name: Verify cloud sync assets
+        run: |
+          test -f android-app/app/src/main/assets/pc-cloud-sync.js
+          test -f android-app/app/src/main/assets/pc-cloud-sync.css
+          test -f android-app/app/src/main/assets/pc-frame-cloud-bridge.js
+          grep -Fq 'android.permission.INTERNET' android-app/app/src/main/AndroidManifest.xml
 
       - name: Build APK
         working-directory: android-app
         run: gradle :app:assembleDebug --no-daemon
 
-      - name: Prepare APK
+      - name: Verify APK
         run: |
-          cp android-app/app/build/outputs/apk/debug/app-debug.apk PajaritoC.apk
+          APK=android-app/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          $ANDROID_HOME/build-tools/35.0.0/aapt dump badging "$APK" | grep -F "package: name='com.luis.pajaritoc.sync2026'"
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK"
+          cp "$APK" PajaritoC.apk
 
       - uses: actions/upload-artifact@v4
         with:
