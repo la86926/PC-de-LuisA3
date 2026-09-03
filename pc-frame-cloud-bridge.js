@@ -36,14 +36,16 @@
     try{
       var r=page&&page.runtime&&typeof page.runtime==='object'?page.runtime:null;
       if(r&&typeof state!=='undefined'){
-        if(typeof r.filter==='string'){
-          state.filter=r.filter;
+        var wantedFilter=typeof r.filter==='string'?r.filter:(typeof r.filterState==='string'?r.filterState:null);
+        if(wantedFilter!==null){
+          state.filter=wantedFilter;
           if(typeof buildList==='function') buildList();
         }
         if(typeof r.histTodo==='boolean') state.histTodo=r.histTodo;
       }
     }catch(e){}
 
+    try{ if(typeof applyPageState==='function') applyPageState(); }catch(e){}
     refreshExercise(page);
 
     try{ if(typeof renderProgress==='function') renderProgress(); }catch(e){}
