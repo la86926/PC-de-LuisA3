@@ -10,13 +10,26 @@
     try{var raw=localStorage.getItem(key);return raw?JSON.parse(raw):null;}catch(e){return null;}
   }
 
+  function cargarOverridesVideosL2(){
+    if(!isL2)return;
+    try{
+      if(document.getElementById('pc-l2-exact-video-overrides'))return;
+      var script=document.createElement('script');
+      script.id='pc-l2-exact-video-overrides';
+      script.src=new URL('l2-exact-video-overrides.js',location.href).href+'?v=20260905-r3';
+      document.head.appendChild(script);
+    }catch(e){}
+  }
+
   function cargarVideosModeloL2(){
     if(!isL2)return;
     try{
-      if(document.getElementById('pc-l2-model-videos'))return;
+      var existente=document.getElementById('pc-l2-model-videos');
+      if(existente){cargarOverridesVideosL2();return;}
       var script=document.createElement('script');
       script.id='pc-l2-model-videos';
       script.src=new URL('l2-model-videos.js',location.href).href+'?v=20260905-r2';
+      script.onload=cargarOverridesVideosL2;
       document.head.appendChild(script);
     }catch(e){}
   }
