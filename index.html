@@ -390,7 +390,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
         var estado=estadoHistorial();
         if(!estado)return;
         var raiz=prepararEjercicio(estado);
-        var disponible=raiz.dataset.droidfishIniciado==='1'&&estado.historial;
+        var disponible=estado.historial;
         pintar(anterior,disponible&&estado.ptr>0);
         pintar(siguiente,disponible&&estado.ptr<estado.total);
       }
