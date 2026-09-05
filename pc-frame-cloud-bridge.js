@@ -16,7 +16,7 @@
       if(document.getElementById('pc-l2-model-videos'))return;
       var script=document.createElement('script');
       script.id='pc-l2-model-videos';
-      script.src=new URL('l2-model-videos.js',location.href).href+'?v=20260905-r1';
+      script.src=new URL('l2-model-videos.js',location.href).href+'?v=20260905-r2';
       document.head.appendChild(script);
     }catch(e){}
   }
