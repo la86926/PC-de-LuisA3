@@ -10,6 +10,25 @@
     try{var raw=localStorage.getItem(key);return raw?JSON.parse(raw):null;}catch(e){return null;}
   }
 
+  function corregirBotonFlechas(){
+    try{
+      var boton=document.getElementById('b-anotar');
+      if(!boton)return;
+      var flecha='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><path d="M11 5h8v8"/></svg>';
+      function sincronizar(){
+        try{
+          var activo=boton.getAttribute('aria-pressed')==='true';
+          var texto=(boton.textContent||'').trim();
+          if(!activo&&texto==='Editar')boton.innerHTML=flecha+'Flechas';
+        }catch(e){}
+      }
+      sincronizar();
+      if(boton.dataset.pcFlechasCorregido)return;
+      boton.dataset.pcFlechasCorregido='1';
+      new MutationObserver(function(){sincronizar();}).observe(boton,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['aria-pressed']});
+    }catch(e){}
+  }
+
   function pageState(){
     return readJson('pc_backup_page_state_v2:'+file)||{};
   }
@@ -76,6 +95,7 @@
       bannerOculto=localStorage.getItem('wp_banner')==='1';
       if(typeof aplicarBanner==='function') aplicarBanner(bannerOculto);
     }catch(e){}
+    corregirBotonFlechas();
   }
 
   function dispatchStorage(keys){
@@ -134,4 +154,8 @@
     refresh:function(){refreshRuntime(pageState());},
     pageState:pageState
   });
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',corregirBotonFlechas,{once:true});
+  else corregirBotonFlechas();
+  window.addEventListener('load',corregirBotonFlechas,{once:true});
 })();
