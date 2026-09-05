@@ -38,8 +38,11 @@ function videoYT(id,titulo){
  return '<div class="pc-video-es" style="margin:.35rem 0 .55rem"><div style="font-weight:700;margin:0 0 .4rem">'+titulo+'</div><div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" title="'+titulo.replace(/"/g,'&quot;')+'" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div></div>';
 }
 var VIDEOS_EXACTOS={
-  /* Solo se agregan aquí videos verificados que correspondan a la partida exacta
-     o a una explicación específica de la misma posición/estructura del ejercicio. */
+  /* Solo videos verificados de la partida exacta, la posición concreta o la misma estructura estratégica. */
+  116:[
+    {id:'XmgU77nn-sk',titulo:'Entendemos la estructura erizo! — Davinin'},
+    {id:'_w_inEOPS-c',titulo:'Diferentes Formas de Enfrentar con Blancas el Sistema Erizo en la Siciliana — Ajedrez Con Boudy'}
+  ]
 };
 function videosES(p,st){
  var exactos=VIDEOS_EXACTOS[+p.n];
@@ -79,5 +82,5 @@ function enriquecer(p,base){
  return Object.assign({},base,{objective:obj,summary:sum,cards:uniqCards(extra.concat(base.cards||[])),chips:Array.from(new Set((base.chips||[]).concat([st.n,r?'profilaxis':'plan posicional'].filter(Boolean))))});
 }
 window.analizarEjercicioPosicional=function(p){var b;try{b=original(p);}catch(e){return original(p);}if(!p||+p.n<1||+p.n>200)return b;try{var x=enriquecer(p,b);for(var i=0;i<2;i++){x.cards=uniqCards(x.cards);if(x.cards.length<6)x.cards=uniqCards((x.cards||[]).concat(b.cards||[]));if(!x.summary||x.summary.length<120)x.summary=(x.summary||'')+' '+(b.summary||'');}return x;}catch(e){console.warn('Explicación L2 enriquecida',e);return b;}};
-window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r5',range:'1-200',reviewPasses:2,installed:true};
+window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r6',range:'1-200',reviewPasses:2,installed:true};
 })();
