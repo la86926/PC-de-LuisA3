@@ -10,13 +10,26 @@
     try{var raw=localStorage.getItem(key);return raw?JSON.parse(raw):null;}catch(e){return null;}
   }
 
+  function cargarVideosModeloL2(){
+    if(!isL2)return;
+    try{
+      if(document.getElementById('pc-l2-model-videos'))return;
+      var script=document.createElement('script');
+      script.id='pc-l2-model-videos';
+      script.src=new URL('l2-model-videos.js',location.href).href+'?v=20260905-r1';
+      document.head.appendChild(script);
+    }catch(e){}
+  }
+
   function cargarExplicacionesL2(){
     if(!isL2)return;
     try{
-      if(document.getElementById('pc-l2-rich-explanations'))return;
+      var existente=document.getElementById('pc-l2-rich-explanations');
+      if(existente){cargarVideosModeloL2();return;}
       var script=document.createElement('script');
       script.id='pc-l2-rich-explanations';
       script.src=new URL('l2-rich-explanations.js',location.href).href+'?v=20260904-r6';
+      script.onload=cargarVideosModeloL2;
       document.head.appendChild(script);
     }catch(e){}
   }
