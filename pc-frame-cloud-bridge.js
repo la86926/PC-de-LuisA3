@@ -16,7 +16,7 @@
       if(document.getElementById('pc-l2-rich-explanations'))return;
       var script=document.createElement('script');
       script.id='pc-l2-rich-explanations';
-      script.src=new URL('l2-rich-explanations.js',location.href).href+'?v=20260904-r4';
+      script.src=new URL('l2-rich-explanations.js',location.href).href+'?v=20260904-r5';
       document.head.appendChild(script);
     }catch(e){}
   }
