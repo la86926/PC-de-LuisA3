@@ -38,12 +38,24 @@ function videoYT(id,titulo){
  return '<div class="pc-video-es" style="margin:.35rem 0 .55rem"><div style="font-weight:700;margin:0 0 .4rem">'+titulo+'</div><div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" title="'+titulo.replace(/"/g,'&quot;')+'" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div></div>';
 }
 function videosES(st){
- if(!st)return [];
+ var generales=[
+  videoYT('IxtP5uONzzI','Estructuras de peones en ajedrez — Ajedrez con Miguel Ángel'),
+  videoYT('DqZIlTWzojA','Estructuras de peones por aperturas — Pasión por el ajedrez')
+ ];
+ if(!st)return generales;
  if(st.n.indexOf('Carlsbad')>=0)return [
   videoYT('tVfH2NfObD8','Estructura Carlsbad: ataque de minorías — Ajedrez estratégico'),
   videoYT('ZPU_OQUXGqc','Ataque de minorías y plan Carlsbad — Dama Roja 150')
- ];
- return [videoYT('dvpN2mA1_Qs','Estructuras de peones: introducción estratégica — Dama Roja 150')];
+ ].concat(generales);
+ if(st.n.indexOf('aislado')>=0||st.n.indexOf('colgantes')>=0||st.n.indexOf('Centro')>=0||st.n.indexOf('Benoni')>=0||st.n.indexOf('India de Rey')>=0||st.n.indexOf('Francesa')>=0||st.n.indexOf('Stonewall')>=0||st.n.indexOf('Maróczy')>=0||st.n.indexOf('Erizo')>=0){
+  return generales.concat([
+   videoYT('tVfH2NfObD8','Plan estratégico: ataque de minorías y casillas débiles — Ajedrez estratégico'),
+   videoYT('ZPU_OQUXGqc','Cómo ejecutar un plan posicional paso a paso — Dama Roja 150')
+  ]);
+ }
+ return generales.concat([
+  videoYT('tVfH2NfObD8','Plan estratégico y ataque de minorías — Ajedrez estratégico')
+ ]);
 }
 function card(i,t,f){return {icon:i,title:t,facts:f.filter(Boolean)};}
 function uniqCards(a){var k={};return a.filter(function(c){if(!c||!c.title||!c.facts||!c.facts.length||k[c.title])return false;k[c.title]=1;c.facts=Array.from(new Set(c.facts));return true;});}
@@ -55,7 +67,7 @@ function especial116(p,base){
  card('⌁','Por qué se llama “Erizo”',['La imagen es la de un erizo encogido: las negras ocupan poco espacio y mantienen las piezas detrás de una coraza de peones.','Las “púas” son sus rupturas y recursos tácticos, sobre todo ...b5 y ...d5.']),
  card('↔','Planes de ambos bandos',['Blancas: restringir ...b5 y ...d5, mejorar piezas, ganar espacio con b4/a4 y evitar abrir líneas sin necesidad.','Negras: completar la coordinación, presionar e4/c4 y buscar el momento exacto para ...b5 o ...d5.','La línea 15.b4!? Tac8 16.Cb3 Db8 17.a3 muestra la lógica: restricción → mejora de piezas → consolidación.']),
  card('◇','Qué debes memorizar',['b4 = quitar c5 al caballo negro.','Pregunta mental: “¿Qué quiere hacer mi rival?” → ...Cc5. “¿Puedo impedírselo?” → b4.','No es una combinación para ganar material ni una jugada única forzada; es una decisión posicional y profiláctica.']),
- card('▶','Video en español y partida para estudiar',['Partida de referencia: Karpov – Bellón López, Linares 1981, después de 14...Cbd7.',videoYT('dvpN2mA1_Qs','Estructuras de peones: introducción estratégica — Dama Roja 150'),'Cuando encuentre un video en español específico sobre esta posición o el Erizo, se mostrará aquí en lugar de un enlace de búsqueda.'])
+ card('▶','Video en español y partida para estudiar',['Partida de referencia: Karpov – Bellón López, Linares 1981, después de 14...Cbd7.',videoYT('dvpN2mA1_Qs','Estructuras de peones: introducción estratégica — Dama Roja 150')])
  ];
  return Object.assign({},base,{objective:'Profilaxis: impedir ...Cc5 y restringir la liberación negra',summary:'15.b4!? es una jugada profiláctica: controla c5 y reduce el salto ...Cc5 del caballo negro. En el Erizo, las negras aceptan menos espacio a cambio de elasticidad y rupturas como ...b5 y ...d5; por eso Karpov primero limita el contrajuego y después mejora sus piezas.',cards:uniqCards(extra.concat(base.cards||[])),chips:Array.from(new Set((base.chips||[]).concat(['Erizo','profilaxis','c5','b4'])))});
 }
@@ -76,5 +88,5 @@ function enriquecer(p,base){
  return Object.assign({},base,{objective:obj,summary:sum,cards:uniqCards(extra.concat(base.cards||[])),chips:Array.from(new Set((base.chips||[]).concat([st.n,r?'profilaxis':'plan posicional'].filter(Boolean))))});
 }
 window.analizarEjercicioPosicional=function(p){var b;try{b=original(p);}catch(e){return original(p);}if(!p||+p.n<1||+p.n>200)return b;try{var x=enriquecer(p,b);for(var i=0;i<2;i++){x.cards=uniqCards(x.cards);if(x.cards.length<6)x.cards=uniqCards((x.cards||[]).concat(b.cards||[]));if(!x.summary||x.summary.length<120)x.summary=(x.summary||'')+' '+(b.summary||'');}return x;}catch(e){console.warn('Explicación L2 enriquecida',e);return b;}};
-window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r3',range:'1-200',reviewPasses:2,installed:true};
+window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r4',range:'1-200',reviewPasses:2,installed:true};
 })();
