@@ -26,7 +26,7 @@
       if(document.getElementById('pc-floating-explain-board-script'))return;
       var script=document.createElement('script');
       script.id='pc-floating-explain-board-script';
-      script.src=new URL('pc-floating-explain-board.js',location.href).href+'?v=20260904-1';
+      script.src=new URL('pc-floating-explain-board.js',location.href).href+'?v=20260904-2';
       document.head.appendChild(script);
     }catch(e){}
   }
