@@ -16,7 +16,7 @@
       if(document.getElementById('pc-l2-exact-video-overrides'))return;
       var script=document.createElement('script');
       script.id='pc-l2-exact-video-overrides';
-      script.src=new URL('l2-exact-video-overrides.js',location.href).href+'?v=20260905-r3';
+      script.src=new URL('l2-exact-video-overrides.js',location.href).href+'?v=20260905-r5';
       document.head.appendChild(script);
     }catch(e){}
   }
