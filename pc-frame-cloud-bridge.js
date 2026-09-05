@@ -21,6 +21,16 @@
     }catch(e){}
   }
 
+  function cargarTableroFlotanteExplicacion(){
+    try{
+      if(document.getElementById('pc-floating-explain-board-script'))return;
+      var script=document.createElement('script');
+      script.id='pc-floating-explain-board-script';
+      script.src=new URL('pc-floating-explain-board.js',location.href).href+'?v=20260904-1';
+      document.head.appendChild(script);
+    }catch(e){}
+  }
+
   function corregirBotonFlechas(){
     try{
       var boton=document.getElementById('b-anotar');
@@ -138,6 +148,7 @@
       if(typeof aplicarBanner==='function') aplicarBanner(bannerOculto);
     }catch(e){}
     corregirBotonFlechas();
+    cargarTableroFlotanteExplicacion();
   }
 
   function dispatchStorage(keys){
@@ -197,7 +208,7 @@
     pageState:pageState
   });
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){corregirBotonFlechas();cargarExplicacionesL2();},{once:true});
-  else {corregirBotonFlechas();cargarExplicacionesL2();}
-  window.addEventListener('load',function(){corregirBotonFlechas();cargarExplicacionesL2();},{once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){corregirBotonFlechas();cargarExplicacionesL2();cargarTableroFlotanteExplicacion();},{once:true});
+  else {corregirBotonFlechas();cargarExplicacionesL2();cargarTableroFlotanteExplicacion();}
+  window.addEventListener('load',function(){corregirBotonFlechas();cargarExplicacionesL2();cargarTableroFlotanteExplicacion();},{once:true});
 })();
