@@ -10,6 +10,17 @@
     try{var raw=localStorage.getItem(key);return raw?JSON.parse(raw):null;}catch(e){return null;}
   }
 
+  function cargarExplicacionesL2(){
+    if(!isL2)return;
+    try{
+      if(document.getElementById('pc-l2-rich-explanations'))return;
+      var script=document.createElement('script');
+      script.id='pc-l2-rich-explanations';
+      script.src=new URL('l2-rich-explanations.js',location.href).href+'?v=20260904-r2';
+      document.head.appendChild(script);
+    }catch(e){}
+  }
+
   function corregirBotonFlechas(){
     try{
       var boton=document.getElementById('b-anotar');
@@ -102,6 +113,7 @@
     try{ if(typeof renderGrafica==='function') renderGrafica(); }catch(e){}
 
     if(isL2){
+      cargarExplicacionesL2();
       try{
         var g=parseInt(localStorage.getItem('wp2_daily_goal'),10);
         trainingGoal=(g>=5&&g<=50)?g:10;
@@ -185,7 +197,7 @@
     pageState:pageState
   });
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',corregirBotonFlechas,{once:true});
-  else corregirBotonFlechas();
-  window.addEventListener('load',corregirBotonFlechas,{once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){corregirBotonFlechas();cargarExplicacionesL2();},{once:true});
+  else {corregirBotonFlechas();cargarExplicacionesL2();}
+  window.addEventListener('load',function(){corregirBotonFlechas();cargarExplicacionesL2();},{once:true});
 })();
