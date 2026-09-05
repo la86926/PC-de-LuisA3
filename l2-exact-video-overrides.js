@@ -24,11 +24,20 @@ var EXACT={
     ['Zd0wL1_Lvwo','Lasker vs Bauer, Ámsterdam 1889 — análisis','es'],
     ['IQXxNR8qXCM','Lasker vs Bauer, Amsterdam 1889 — análisis completo','en']
   ],
+  10:[
+    ['Xh52obbC6OU','Lasker vs Steinitz — partida 3, Mundial 1896-97','en']
+  ],
+  20:[
+    ['2wOYNCq4IqU','Alekhine vs Rubinstein, La Haya 1921 — partida comentada','en']
+  ],
   27:[
     ['bqE5fmjpUQM','Alekhine vs Nimzowitsch, Nueva York 1927','en']
   ],
   29:[
     ['lNLIckYikoU','Bogoljubow vs Alekhine — partida 8, Mundial 1929','en']
+  ],
+  30:[
+    ['GvSD6hiQRas','Yates vs Alekhine, San Remo 1930 — análisis de la partida','en']
   ],
   34:[
     ['SIp4_yyB_nM','Lasker vs Capablanca, Moscú 1935','en']
@@ -117,7 +126,7 @@ function install(){
   x.cards=cards;
   return x;
  };
- window.PC_L2_EXACT_VIDEO_QA={range:'1-200',version:'2026-09-05-r3',verifiedOnly:true,spanishFirst:true,englishFallback:true};
+ window.PC_L2_EXACT_VIDEO_QA={range:'1-200',version:'2026-09-05-r4',verifiedOnly:true,spanishFirst:true,englishFallback:true};
 }
 install();
 })();
