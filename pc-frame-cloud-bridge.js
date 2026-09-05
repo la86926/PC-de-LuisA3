@@ -15,13 +15,43 @@
       var boton=document.getElementById('b-anotar');
       if(!boton)return;
       var flecha='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><path d="M11 5h8v8"/></svg>';
+      var borrar='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
+      var cambiando=false;
       function sincronizar(){
+        if(cambiando)return;
         try{
           var activo=boton.getAttribute('aria-pressed')==='true';
           var texto=(boton.textContent||'').trim();
-          if(!activo&&texto==='Editar')boton.innerHTML=flecha+'Flechas';
-        }catch(e){}
+          var deseado=activo?'Borrar':'Flechas';
+          if(texto!==deseado){
+            cambiando=true;
+            boton.innerHTML=(activo?borrar:flecha)+deseado;
+            cambiando=false;
+          }
+        }catch(e){cambiando=false;}
       }
+      function instalarAccion(){
+        if(boton.dataset.pcBorrarFlechas==='1')return;
+        boton.dataset.pcBorrarFlechas='1';
+        boton.onclick=function(){
+          try{
+            if(typeof anot!=='function')return;
+            var A=anot();
+            if(A.modo){
+              A.lista=[];
+              A.tirando=null;
+              A.modo=false;
+            }else{
+              A.modo=true;
+              A.tirando=null;
+            }
+            if(typeof actualizarBotonAnotar==='function')actualizarBotonAnotar();
+            if(typeof pintarFlechas==='function')pintarFlechas();
+            sincronizar();
+          }catch(e){}
+        };
+      }
+      instalarAccion();
       sincronizar();
       if(boton.dataset.pcFlechasCorregido)return;
       boton.dataset.pcFlechasCorregido='1';
