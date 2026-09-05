@@ -11,8 +11,9 @@ function css(){
  if(document.getElementById('pc-float-board-css'))return;
  var s=document.createElement('style');s.id='pc-float-board-css';
  s.textContent=`
- .pc-float-toggle{display:inline-flex;align-items:center;gap:.38rem;border:1px solid var(--ex-card-border,var(--line));background:var(--ex-card,var(--panel));color:var(--ex-ink,var(--ink));padding:.46rem .66rem;border-radius:12px;font:600 .78rem system-ui,-apple-system,sans-serif;cursor:pointer}
- .pc-float-toggle[aria-pressed="true"]{border-color:var(--acento-tema,var(--gold));color:var(--acento-txt,var(--gold))}
+ .pc-float-toggle-row{width:100%;display:flex;align-items:center;justify-content:center;padding:0 0 .65rem;margin:0 0 .15rem;position:relative;z-index:3}
+ .pc-float-toggle{width:min(100%,340px);display:inline-flex;align-items:center;justify-content:center;gap:.42rem;border:1px solid var(--ex-card-border,var(--line));background:var(--ex-card,var(--panel));color:var(--ex-ink,var(--ink));padding:.55rem .78rem;border-radius:12px;font:700 .8rem system-ui,-apple-system,sans-serif;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.08)}
+ .pc-float-toggle[aria-pressed="true"]{border-color:var(--acento-tema,var(--gold));color:var(--acento-txt,var(--gold));background:var(--ex-button,var(--panel2))}
  .pc-float-board{position:fixed;z-index:12050;touch-action:none;user-select:none;-webkit-user-select:none;background:var(--ex-bg,var(--panel));border:1px solid var(--ex-card-border,var(--line));border-radius:16px;box-shadow:0 20px 55px rgba(0,0,0,.34);overflow:hidden;min-width:140px;max-width:86vw}
  .pc-float-head{height:38px;display:flex;align-items:center;gap:.4rem;padding:0 .45rem 0 .7rem;background:var(--ex-card,var(--panel2));border-bottom:1px solid var(--ex-card-border,var(--line));cursor:grab;touch-action:none}
  .pc-float-head:active{cursor:grabbing}
@@ -24,7 +25,7 @@ function css(){
  .pc-float-bubble{position:fixed;z-index:12050;width:66px;height:66px;border-radius:14px;border:1px solid var(--ex-card-border,var(--line));background:var(--ex-bg,var(--panel));box-shadow:0 12px 32px rgba(0,0,0,.3);padding:4px;overflow:hidden;touch-action:none;cursor:grab}
  .pc-float-bubble .pc-bubble-board{width:100%;height:100%;overflow:hidden;border-radius:9px;pointer-events:none}
  .pc-float-bubble .pc-bubble-board>*{width:100%!important;height:100%!important;max-width:none!important;margin:0!important}
- @media(max-width:560px){.pc-float-board{max-width:92vw}.pc-float-toggle{font-size:.72rem;padding:.42rem .56rem}}
+ @media(max-width:560px){.pc-float-board{max-width:92vw}.pc-float-toggle{font-size:.76rem;padding:.52rem .62rem}.pc-float-toggle-row{padding-bottom:.55rem}}
  `;
  document.head.appendChild(s);
 }
@@ -47,10 +48,6 @@ function findSource(){
  candidates=candidates.filter(Boolean);
  if(candidates.length)return candidates[0];
  return document.querySelector('#board,.board');
-}
-function findActions(){
- var modal=findModal();if(!modal)return null;
- return modal.querySelector('.explanation-topbar-actions,.workspace-topbar-actions,.workspace-topbar,.explanation-topbar,.explain-topbar,[class*="topbar"]');
 }
 function cloneBoard(){
  source=findSource();if(!source)return null;
@@ -184,14 +181,23 @@ function bindGestures(el,handle){
  el.addEventListener('pointerup',up,{passive:false});
  el.addEventListener('pointercancel',up,{passive:false});
 }
+function placeToggleRow(){
+ source=findSource();if(!source||!source.parentNode)return null;
+ var row=document.getElementById('pc-float-board-toggle-row');
+ if(!row){row=document.createElement('div');row.id='pc-float-board-toggle-row';row.className='pc-float-toggle-row';}
+ if(row.parentNode!==source.parentNode||row.nextSibling!==source){source.parentNode.insertBefore(row,source);}
+ return row;
+}
 function installToggle(){
- css();var actions=findActions();if(!actions)return;
+ css();var row=placeToggleRow();if(!row)return;
  toggle=document.getElementById('pc-float-board-toggle');
- if(toggle)return;
- toggle=document.createElement('button');toggle.id='pc-float-board-toggle';toggle.type='button';toggle.className='pc-float-toggle';toggle.setAttribute('aria-pressed','false');
- toggle.innerHTML='▣ <span>Tablero flotante</span>';
- toggle.onclick=function(){state.open?closeAll():openFloat();};
- actions.insertBefore(toggle,actions.firstChild);
+ if(!toggle){
+  toggle=document.createElement('button');toggle.id='pc-float-board-toggle';toggle.type='button';toggle.className='pc-float-toggle';toggle.setAttribute('aria-pressed','false');
+  toggle.innerHTML='▣ <span>Tablero flotante</span>';
+  toggle.onclick=function(){state.open?closeAll():openFloat();};
+ }
+ if(toggle.parentNode!==row)row.appendChild(toggle);
+ toggle.setAttribute('aria-pressed',state.open?'true':'false');
 }
 function sync(){
  if(explanationOpen()){installToggle();if(state.open)refreshClone();}
