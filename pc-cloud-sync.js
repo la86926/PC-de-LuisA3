@@ -159,7 +159,7 @@ function injectBridge(frame){
     if(!docu||!docu.head||docu.getElementById('pc-cloud-frame-bridge'))return;
     const script=docu.createElement('script');
     script.id='pc-cloud-frame-bridge';
-    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=2';
+    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=3';
     docu.head.appendChild(script);
   }catch(e){}
 }
