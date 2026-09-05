@@ -34,7 +34,17 @@ function estructura(g){
 }
 function restriccion(g,m){if(!m||m.piece!=='p')return null;var s=ctrPeon(m.to,m.color),cand=movRival(g,rv(m.color)).filter(function(x){return s.includes(x.to)&&x.piece!=='p'&&x.piece!=='k';});if(!cand.length)return null;cand.sort(function(a,b){return (a.piece==='n'?0:1)-(b.piece==='n'?0:1);});var x=cand[0];return {sq:x.to,from:x.from,p:x.piece,txt:'...'+(PS[x.piece]||'')+x.to};}
 function linea(p){var g=new Chess(p.fen),a=[];(p.u||[]).forEach(function(u){try{var m=g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||'q'});if(m)a.push(m);}catch(e){}});return a;}
-function yt(q){return '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(q)+'" target="_blank" rel="noopener">YouTube: “'+q+'”</a>';}
+function videoYT(id,titulo){
+ return '<div class="pc-video-es" style="margin:.35rem 0 .55rem"><div style="font-weight:700;margin:0 0 .4rem">'+titulo+'</div><div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" title="'+titulo.replace(/"/g,'&quot;')+'" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div></div>';
+}
+function videosES(st){
+ if(!st)return [];
+ if(st.n.indexOf('Carlsbad')>=0)return [
+  videoYT('tVfH2NfObD8','Estructura Carlsbad: ataque de minorías — Ajedrez estratégico'),
+  videoYT('ZPU_OQUXGqc','Ataque de minorías y plan Carlsbad — Dama Roja 150')
+ ];
+ return [videoYT('dvpN2mA1_Qs','Estructuras de peones: introducción estratégica — Dama Roja 150')];
+}
 function card(i,t,f){return {icon:i,title:t,facts:f.filter(Boolean)};}
 function uniqCards(a){var k={};return a.filter(function(c){if(!c||!c.title||!c.facts||!c.facts.length||k[c.title])return false;k[c.title]=1;c.facts=Array.from(new Set(c.facts));return true;});}
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
@@ -45,7 +55,7 @@ function especial116(p,base){
  card('⌁','Por qué se llama “Erizo”',['La imagen es la de un erizo encogido: las negras ocupan poco espacio y mantienen las piezas detrás de una coraza de peones.','Las “púas” son sus rupturas y recursos tácticos, sobre todo ...b5 y ...d5.']),
  card('↔','Planes de ambos bandos',['Blancas: restringir ...b5 y ...d5, mejorar piezas, ganar espacio con b4/a4 y evitar abrir líneas sin necesidad.','Negras: completar la coordinación, presionar e4/c4 y buscar el momento exacto para ...b5 o ...d5.','La línea 15.b4!? Tac8 16.Cb3 Db8 17.a3 muestra la lógica: restricción → mejora de piezas → consolidación.']),
  card('◇','Qué debes memorizar',['b4 = quitar c5 al caballo negro.','Pregunta mental: “¿Qué quiere hacer mi rival?” → ...Cc5. “¿Puedo impedírselo?” → b4.','No es una combinación para ganar material ni una jugada única forzada; es una decisión posicional y profiláctica.']),
- card('▶','Partida y búsquedas para estudiar',['Partida de referencia: Karpov – Bellón López, Linares 1981, después de 14...Cbd7.',yt('Karpov Bellon Lopez Linares 1981 b4'),yt('estructura Erizo ajedrez Karpov'),yt('Hedgehog chess structure model games')])
+ card('▶','Video en español y partida para estudiar',['Partida de referencia: Karpov – Bellón López, Linares 1981, después de 14...Cbd7.',videoYT('dvpN2mA1_Qs','Estructuras de peones: introducción estratégica — Dama Roja 150'),'Cuando encuentre un video en español específico sobre esta posición o el Erizo, se mostrará aquí en lugar de un enlace de búsqueda.'])
  ];
  return Object.assign({},base,{objective:'Profilaxis: impedir ...Cc5 y restringir la liberación negra',summary:'15.b4!? es una jugada profiláctica: controla c5 y reduce el salto ...Cc5 del caballo negro. En el Erizo, las negras aceptan menos espacio a cambio de elasticidad y rupturas como ...b5 y ...d5; por eso Karpov primero limita el contrajuego y después mejora sus piezas.',cards:uniqCards(extra.concat(base.cards||[])),chips:Array.from(new Set((base.chips||[]).concat(['Erizo','profilaxis','c5','b4'])))});
 }
@@ -60,11 +70,11 @@ function enriquecer(p,base){
  op.push('Antes de ejecutar tu plan, identifica la ruptura liberadora del rival; impedirla o hacerla desfavorable suele ser más importante que atacar de inmediato.');
  var plan=[];if(li[1])plan.push('La respuesta principal registrada es '+es(li[1].san)+'. Estudia '+san+' junto con esa reacción, no como una jugada aislada.');if(li[2])plan.push('La siguiente jugada del mismo bando es '+es(li[2].san)+'. Esa continuidad revela el plan real de la posición.');if(li[4])plan.push('Más adelante la línea incluye '+es(li[4].san)+', otra pista de la maniobra que el ejercicio quiere enseñar.');plan.push('Plan típico para las '+side+' en '+st.n+': '+(m.color==='w'?st.w:st.b)+'.');
  var mem=[r?(san+' = controlar '+r.sq+' y restringir '+r.txt+'.'):(san+' = mejorar una pieza, una ruptura o una casilla dentro de la estructura '+st.n+'.'),'No memorices solo la respuesta. Memoriza la cadena: estructura → plan rival → casilla/ruptura clave → jugada del ejercicio.','Pregunta de entrenamiento: “¿Qué haría mi rival con un turno gratis?”. Esa pregunta convierte la solución en conocimiento posicional reutilizable.'];
- var extra=[card('◎','Idea posicional de '+san,idea),card('▦','Estructura: '+st.n,[st.por,'Plan de blancas: '+st.w+'.','Plan de negras: '+st.b+'.']),card('⊘','Qué quiere el rival y qué debes vigilar',op),card('↗','Cómo continúa el plan',plan),card('◇','Qué debes memorizar',mem),card('▶','Partidas modelo para buscar en YouTube',st.q.map(yt))];
+ var extra=[card('◎','Idea posicional de '+san,idea),card('▦','Estructura: '+st.n,[st.por,'Plan de blancas: '+st.w+'.','Plan de negras: '+st.b+'.']),card('⊘','Qué quiere el rival y qué debes vigilar',op),card('↗','Cómo continúa el plan',plan),card('◇','Qué debes memorizar',mem),card('▶','Videos en español para reproducir aquí',videosES(st))];
  var obj=r?'Profilaxis: controlar '+r.sq+' y restringir '+r.txt:(base.objective||'Comprender el plan posicional de '+san);
  var sum=san+' debe entenderse dentro de '+st.n+'. '+(r?'La jugada restringe '+r.txt+' al controlar '+r.sq+'; primero reduce el contrajuego rival y luego permite continuar el plan propio. ':'Su valor está en cómo modifica la coordinación, la estructura y las casillas importantes. ')+'La clave es relacionar la jugada con la respuesta del rival y con la siguiente mejora de pieza o ruptura.';
  return Object.assign({},base,{objective:obj,summary:sum,cards:uniqCards(extra.concat(base.cards||[])),chips:Array.from(new Set((base.chips||[]).concat([st.n,r?'profilaxis':'plan posicional'].filter(Boolean))))});
 }
 window.analizarEjercicioPosicional=function(p){var b;try{b=original(p);}catch(e){return original(p);}if(!p||+p.n<1||+p.n>200)return b;try{var x=enriquecer(p,b);for(var i=0;i<2;i++){x.cards=uniqCards(x.cards);if(x.cards.length<6)x.cards=uniqCards((x.cards||[]).concat(b.cards||[]));if(!x.summary||x.summary.length<120)x.summary=(x.summary||'')+' '+(b.summary||'');}return x;}catch(e){console.warn('Explicación L2 enriquecida',e);return b;}};
-window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r2',range:'1-200',reviewPasses:2,installed:true};
+window.PC_L2_EXPLAIN_QA={version:'2026-09-04-r3',range:'1-200',reviewPasses:2,installed:true};
 })();
