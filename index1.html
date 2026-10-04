@@ -357,7 +357,84 @@ body.workspace-open{overflow:hidden}
 .explain-theme-switch button{border:0;background:transparent;padding:.48rem .62rem;font-size:.7rem;font-weight:700;line-height:1;white-space:nowrap}
 .explanation-bg{--ex-shell:linear-gradient(180deg,rgba(249,249,247,.99),rgba(239,241,237,.99));--ex-topbar:rgba(249,249,247,.86);--ex-ink:#171b18;--ex-muted:#626b65;--ex-card:rgba(255,255,255,.82);--ex-card-border:rgba(25,31,27,.08);--ex-card-muted:#68716b;--ex-soft:#edf0ec;--ex-soft-ink:#313833;--ex-button:#e5e8e4;--ex-button-ink:#303632;--ex-board-frame:#dfe4de}
 .explanation-bg[data-resolved-theme="dark"]{--ex-shell:linear-gradient(180deg,rgba(27,32,29,.99),rgba(17,21,19,.99));--ex-topbar:rgba(27,32,29,.9);--ex-ink:#f1f4f1;--ex-muted:#aab3ac;--ex-card:rgba(39,46,42,.88);--ex-card-border:rgba(255,255,255,.085);--ex-card-muted:#c0c8c2;--ex-soft:#303833;--ex-soft-ink:#e5eae6;--ex-button:#353d38;--ex-button-ink:#f1f4f1;--ex-board-frame:#303833}
-.explanation-bg .explanation-shell{background:var(--ex-shell);color:var(--ex-ink)}
+.explanation-bg .plan-layout{padding:clamp(1rem,3vw,2rem);display:grid;gap:1rem}
+.plan-hero-card{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(1.2rem,4vw,2.6rem);padding:clamp(1.25rem,4vw,2.5rem)}
+.goal-ring{--goal:0deg;width:clamp(126px,18vw,168px);aspect-ratio:1;padding:10px}
+.goal-ring>div{height:100%;display:grid;place-content:center;text-align:center;border:1px solid var(--line)}
+.goal-ring strong{font-size:clamp(2rem,5vw,3.2rem);line-height:.9;letter-spacing:-.06em}
+.goal-ring span{font-size:.72rem;margin-top:.45rem}
+.plan-hero-copy h3{font-size:clamp(1.45rem,3vw,2.15rem);letter-spacing:-.035em;margin:.75rem 0 .45rem}
+.plan-hero-copy p{margin:0;max-width:56ch}
+.plan-pill{display:inline-flex;padding:.34rem .65rem;border:1px solid var(--line);font-size:.72rem;font-weight:650}
+.plan-main-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.35rem}
+.plan-primary,.plan-secondary{border:0;padding:.78rem 1rem;font-weight:700;font-size:.86rem;transition:.18s}
+.plan-secondary{border:1px solid var(--line)}
+.plan-primary:hover,.plan-secondary:hover{transform:translateY(-1px)}
+.plan-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+.plan-stat{position:relative;min-height:126px;padding:1rem;border:1px solid var(--line)}
+.plan-stat>span{display:block;font-size:.72rem;font-weight:650}
+.plan-stat>strong{display:block;font-size:2rem;line-height:1;margin-top:.8rem;letter-spacing:-.05em}
+.plan-stat>small{display:block;font-size:.69rem;margin-top:.35rem}
+.goal-stepper{position:absolute;right:.75rem;bottom:.75rem;display:flex;overflow:hidden}
+.goal-stepper button{width:2rem;height:1.85rem;border:0;background:transparent;font-size:1.1rem}
+.error-book{padding:clamp(1.1rem,3vw,1.7rem);border:1px solid var(--line)}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.section-heading h3{font-size:1.15rem;letter-spacing:-.025em;margin:0}
+.section-heading.compact{margin-bottom:.9rem}
+.text-action{border:0;padding:.58rem .8rem;font-weight:700;font-size:.76rem}
+.error-book-intro{font-size:.82rem;max-width:72ch;margin:.7rem 0 1rem}
+.error-list{display:grid;gap:.55rem}
+.error-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:1px solid var(--line);padding:.72rem .8rem;transition:.16s}
+.error-item:hover{transform:translateY(-1px)}
+.error-number{width:2.6rem;height:2.6rem;display:grid;place-items:center;font-family:var(--mono);font-size:.75rem;font-weight:750}
+.error-copy strong{display:block;font-size:.86rem}
+.error-copy span{display:block;font-size:.71rem;margin-top:.15rem}
+.error-score{font-size:.68rem;font-weight:750;padding:.3rem .55rem;white-space:nowrap}
+.error-empty{padding:1.2rem;text-align:center;border:1px dashed var(--line);font-size:.82rem}
+
+@media(max-width:760px){.plan-layout{padding:.75rem}
+.plan-hero-card{grid-template-columns:1fr;text-align:left}
+.goal-ring{width:124px}
+.plan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.text-action{font-size:.7rem}
+}
+@media(max-width:420px){.plan-stat{min-height:112px}
+.plan-main-actions{display:grid}
+.plan-primary,.plan-secondary{width:100%}
+.error-item{grid-template-columns:auto 1fr}
+.error-score{grid-column:2;justify-self:start}
+}
+
+/* ---- Plan de entrenamiento (traído de PC de L2) + frase del día ---- */
+.frase-card{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(1rem,3.5vw,2rem);padding:clamp(1rem,3vw,1.6rem);border:1px solid var(--line);border-radius:var(--r-card,20px);background:var(--ex-card,var(--panel));position:relative;overflow:hidden}
+.frase-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(var(--gold),var(--crest));opacity:.75}
+.frase-mini{position:relative;width:clamp(96px,16vw,124px);aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);border-radius:12px;overflow:hidden;box-shadow:var(--s2,0 8px 20px rgba(0,0,0,.25))}
+.frase-mini i{display:block;background:var(--light,#eeeed2)}
+.frase-mini i.d{background:var(--dark,#769656)}
+.frase-mini i.meta{box-shadow:inset 0 0 0 3px var(--gold);animation:fraseMeta 6.4s infinite}
+.frase-caballo{position:absolute;left:0;top:0;width:25%;height:25%;display:grid;place-items:center;animation:fraseSalto 6.4s cubic-bezier(.45,.05,.3,1) infinite;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+.frase-caballo svg{width:92%;height:92%;display:block}
+@keyframes fraseSalto{
+  0%,12%{transform:translate(0,300%) scale(1)}
+  18%{transform:translate(50%,200%) scale(1.25)}
+  25%,37%{transform:translate(100%,100%) scale(1)}
+  43%{transform:translate(200%,50%) scale(1.25)}
+  50%,62%{transform:translate(300%,0) scale(1)}
+  68%{transform:translate(250%,100%) scale(1.25)}
+  75%,87%{transform:translate(200%,200%) scale(1)}
+  93%{transform:translate(100%,250%) scale(1.25)}
+  100%{transform:translate(0,300%) scale(1)}
+}
+@keyframes fraseMeta{0%,100%{opacity:.25}50%{opacity:1}}
+.frase-copy{min-width:0}
+.frase-eyebrow{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.frase-texto{font-family:var(--serif);font-size:clamp(1.08rem,2.6vw,1.42rem);line-height:1.38;letter-spacing:-.01em;margin:.5rem 0 .8rem;color:var(--ink);transition:opacity .25s}
+.frase-texto.cambiando{opacity:0}
+.frase-otra{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:var(--r-cap,999px);padding:.45rem .85rem;font-size:.74rem;font-weight:650;cursor:pointer}
+.frase-otra:hover{color:var(--ink);border-color:var(--line-viva,var(--line))}
+@media(max-width:520px){.frase-card{grid-template-columns:1fr;justify-items:start}.frase-mini{width:104px}}
+@media(prefers-reduced-motion:reduce){.frase-caballo,.frase-mini i.meta{animation:none}}
+.explanation-shell{background:var(--ex-shell);color:var(--ex-ink)}
 .explanation-bg .explanation-topbar{background:var(--ex-topbar)}
 .explanation-bg .workspace-topbar h2{color:var(--ex-ink)}
 .explanation-bg .workspace-topbar p,.explanation-bg .workspace-eyebrow{color:var(--ex-muted)}
@@ -2172,14 +2249,66 @@ html[data-modo="claro"],html[data-modo="oscuro"]{
   </div>
 </div>
 
-<div id="gift-modal" class="confirm-bg gift-bg">
-  <div class="gift-box">
-    <span class="emoji"><img src="regalo1.png" alt="Regalo" style="width:3rem;height:3rem;object-fit:contain;display:block;margin:0 auto"></span> 
-    <h3>Para un gran amigo</h3>
-    <div class="gift-lema">Porque eres el mejor</div>
-    <p>Creado con profundo aprecio para ti, mi buen amigo<br><span class="firma">Manuel Jesús Córdova Carhuapoma</span></p>
-    <button class="gift-x" id="b-gift-close">Cerrar</button>
-  </div>
+<div id="gift-modal" class="workspace-bg" aria-hidden="true">
+  <section class="workspace-shell plan-shell" role="dialog" aria-modal="true" aria-labelledby="plan-title">
+    <header class="workspace-topbar">
+      <div>
+        <span class="workspace-eyebrow">EL MÉTODO PC 1</span>
+        <h2 id="plan-title">Tu entrenamiento</h2>
+        <p>Continúa con intención, repasa tus errores y cumple una meta posible cada día.</p>
+      </div>
+      <div class="pc-modo pc-modo-mini" role="group" aria-label="Apariencia"><button type="button" data-modo="claro" aria-pressed="false" title="Claro" aria-label="Apariencia: Claro"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.1"/><path d="M12 3.2v2.1M12 18.7v2.1M3.2 12h2.1M18.7 12h2.1M5.9 5.9l1.5 1.5M16.6 16.6l1.5 1.5M18.1 5.9l-1.5 1.5M7.4 16.6l-1.5 1.5"/></svg></button><button type="button" data-modo="oscuro" aria-pressed="false" title="Oscuro" aria-label="Apariencia: Oscuro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 13.1A8.3 8.3 0 1 1 11 3.2a6.6 6.6 0 0 0 9.8 9.9z"/></svg></button><button type="button" data-modo="sistema" aria-pressed="false" title="Como el sistema" aria-label="Apariencia: Como el sistema"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.8" width="17.6" height="11.6" rx="1.7"/><path d="M8.6 19.6h6.8"/></svg></button></div>
+      <button class="workspace-close" id="b-gift-close" type="button" aria-label="Cerrar plan de entrenamiento">✕</button>
+    </header>
+
+    <div class="plan-layout">
+      <section class="frase-card" aria-live="polite">
+        <div class="frase-mini" aria-hidden="true">
+          <i></i><i class="d"></i><i></i><i class="d meta"></i>
+          <i class="d"></i><i></i><i class="d"></i><i></i>
+          <i></i><i class="d"></i><i></i><i class="d"></i>
+          <i class="d"></i><i></i><i class="d"></i><i></i>
+          <span class="frase-caballo" id="frase-caballo"></span>
+        </div>
+        <div class="frase-copy">
+          <span class="frase-eyebrow">Frase del día</span>
+          <p class="frase-texto" id="frase-texto">Golpe tras golpe sobre el mismo punto: así se graban los patrones.</p>
+          <button class="frase-otra" id="frase-otra" type="button">Otra frase ↻</button>
+        </div>
+      </section>
+
+      <section class="plan-hero-card">
+        <div class="goal-ring" id="goal-ring" style="--goal:0deg">
+          <div><strong id="plan-today">0</strong><span id="plan-goal-label">de 10 hoy</span></div>
+        </div>
+        <div class="plan-hero-copy">
+          <span class="plan-pill" id="plan-message">Una sesión breve también cuenta.</span>
+          <h3 id="plan-next-title">Tu siguiente paso</h3>
+          <p id="plan-next-text">Retoma el último ejercicio o revisa una posición que te costó.</p>
+          <div class="plan-main-actions">
+            <button class="plan-primary" id="plan-continue" type="button">Continuar donde quedé</button>
+            <button class="plan-secondary" id="plan-recommended" type="button">Ejercicio recomendado</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="plan-stat-grid">
+        <article class="plan-stat"><span>Meta diaria</span><strong id="plan-goal">10</strong><div class="goal-stepper"><button id="b-goal-minus" type="button" aria-label="Reducir meta">−</button><button id="b-goal-plus" type="button" aria-label="Aumentar meta">+</button></div></article>
+        <article class="plan-stat"><span>Racha de días</span><strong id="plan-day-streak">0</strong><small>con actividad</small></article>
+        <article class="plan-stat"><span>Por resolver</span><strong id="plan-unresolved">0</strong><small>del libro</small></article>
+        <article class="plan-stat"><span>Errores pendientes</span><strong id="plan-errors">0</strong><small>para dominar</small></article>
+      </section>
+
+      <section class="error-book">
+        <div class="section-heading">
+          <div><span class="workspace-eyebrow">CUADERNO DE ERRORES</span><h3>Posiciones para volver a mirar</h3></div>
+          <button class="text-action" id="plan-errors-start" type="button">Practicar la primera</button>
+        </div>
+        <p class="error-book-intro">Aquí entran los ejercicios con una jugada incorrecta, una pista o la solución vista. Se consideran dominados después de resolverlos limpiamente dos veces.</p>
+        <div class="error-list" id="error-list"></div>
+      </section>
+    </div>
+  </section>
 </div>
 
 <div id="explain-modal" class="workspace-bg explanation-bg" aria-hidden="true" data-theme-mode="system" data-resolved-theme="light">
@@ -4055,6 +4184,7 @@ function load(p){
   state.fen=p.fen; state.uci=p.u.slice(); state.san=p.ln.slice();
 
   state.step=0; state.sel=null; state.busy=false; state.orient = p.o; state.freemode = (p.v===0); state.premove = null; state.lastMove = null;
+  state.attemptHadError=false; state.attemptUsedHint=false; state.attemptUsedSolution=false;
   state.anaMoves=null; state.anaPtr=0;
   state.viewBack=false; state.liveMoves=null;
 
@@ -4394,6 +4524,8 @@ function tryMove(from,to){
             },420);
 
   }else{
+    state.attemptHadError=true;
+    registrarIncidenciaEntrenamiento('error');
     sndError();
     flash(to,'bad'); const cf=cellOf(from); if(cf)cf.classList.add('bad');
     setTimeout(()=>{cf&&cf.classList.remove('bad');},420);
@@ -4410,6 +4542,7 @@ function onSolved(){
   lanzarConfeti(lastStreak>0 && (lastStreak+1)%10===0 ? 120 : 45);
 
   const p=curr();
+  actualizarDominioDelError(p.n);
   if(!solved.has(p.n)){solved.add(p.n);saveSolved();}
   if(!solvedAt[p.n]){ solvedAt[p.n]=Date.now(); saveSolvedAt(); }
   histLog.unshift({n:p.n, t:Date.now()}); saveHistLog();
@@ -4762,6 +4895,10 @@ $('b-ana-next').onclick=()=>irAJugada(state.anaPtr+1);
 
 $('b-hint').onclick=()=>{
   if(state.freemode||state.step>=state.uci.length)return;
+  if(!state.attemptUsedHint){
+    state.attemptUsedHint=true;
+    registrarIncidenciaEntrenamiento('hint');
+  }
   const from=state.uci[state.step].slice(0,2);
   const c=cellOf(from); if(c){c.classList.add('sel');setStatus('idle','Pista: mueve la pieza de '+from+'.');}
 };
@@ -4795,6 +4932,10 @@ $('b-sol').onclick=()=>{
     return;
   }
 
+  if(!state.attemptUsedSolution){
+    state.attemptUsedSolution=true;
+    registrarIncidenciaEntrenamiento('solution');
+  }
   playSolution();
 };
 
@@ -5484,12 +5625,146 @@ $('g-dia').onclick=()=>{graficaModo='dia';$('g-dia').classList.add('active');$('
 
 $('b-hist-open').onclick=()=>{ renderHistorial(); renderGrafica(); $('hist-modal').classList.add('open'); };
 
-$('b-gift').onclick=()=>{ $('gift-modal').classList.add('open'); };
-$('gift-modal').addEventListener('click',e=>{
-  if(e.target.id==='gift-modal' || e.target.id==='b-gift-close'){
-    $('gift-modal').classList.remove('open');
+/* ---- Plan de entrenamiento (traído de PC de L2) ---- */
+let trainingGoal=(function(){var n=parseInt(localStorage.getItem('wp_daily_goal'),10);return n>=5&&n<=50?n:10;})();
+let errorBook=loadErrorBook();
+
+function loadErrorBook(){
+  try{const raw=localStorage.getItem('wp_error_book');return raw?JSON.parse(raw):{};}
+  catch(e){return {};}
+}
+function saveErrorBook(){
+  try{localStorage.setItem('wp_error_book',JSON.stringify(errorBook));}catch(e){}
+}
+function registrarIncidenciaEntrenamiento(tipo){
+  const p=curr(); if(!p)return;
+  const e=errorBook[p.n]||{n:p.n,errors:0,hints:0,solutions:0,clean:0,mastered:false,last:0};
+  if(tipo==='error')e.errors=(e.errors||0)+1;
+  if(tipo==='hint')e.hints=(e.hints||0)+1;
+  if(tipo==='solution')e.solutions=(e.solutions||0)+1;
+  e.clean=0;e.mastered=false;e.last=Date.now();errorBook[p.n]=e;saveErrorBook();
+}
+function actualizarDominioDelError(n){
+  const e=errorBook[n];if(!e)return;
+  if(!state.attemptHadError&&!state.attemptUsedHint&&!state.attemptUsedSolution){
+    e.clean=(e.clean||0)+1;
+    if(e.clean>=2)e.mastered=true;
+  }else{
+    e.clean=0;e.mastered=false;
   }
-});
+  e.last=Date.now();saveErrorBook();
+}
+function dos(n){return (n<10?'0':'')+n;}
+function fechaClave(ts){
+  const d=new Date(ts);return d.getFullYear()+'-'+dos(d.getMonth()+1)+'-'+dos(d.getDate());
+}
+function resueltosHoy(){
+  const hoy=fechaClave(Date.now()),vistos={};let total=0;
+  histLog.forEach(function(e){if(fechaClave(e.t)===hoy&&!vistos[e.n]){vistos[e.n]=1;total++;}});
+  return total;
+}
+function rachaDeDias(){
+  const dias={};histLog.forEach(function(e){dias[fechaClave(e.t)]=1;});
+  let cursor=new Date();cursor.setHours(0,0,0,0);
+  if(!dias[fechaClave(cursor.getTime())])cursor.setDate(cursor.getDate()-1);
+  let racha=0;
+  while(dias[fechaClave(cursor.getTime())]){racha++;cursor.setDate(cursor.getDate()-1);}
+  return racha;
+}
+function erroresPendientes(){
+  return Object.keys(errorBook).map(function(k){return errorBook[k];}).filter(function(e){return e&&!e.mastered;}).sort(function(a,b){return (b.last||0)-(a.last||0);});
+}
+function numeroRecomendado(){
+  const pendientes=erroresPendientes();
+  if(pendientes.length)return pendientes[0].n;
+  if(!PUZZLES.length)return null;
+  const actual=curr()?curr().n:1,total=PUZZLES.length;
+  const orden=PUZZLES.slice().sort(function(a,b){
+    return ((a.n-actual+total)%total)-((b.n-actual+total)%total);
+  });
+  let libre=null;
+  for(let i=0;i<orden.length;i++){if(!solved.has(orden[i].n)){libre=orden[i];break;}}
+  return (libre||orden[0]).n;
+}
+function renderPlanEntrenamiento(){
+  const hoy=resueltosHoy(),pendientes=erroresPendientes(),pct=Math.min(1,hoy/trainingGoal);
+  $('plan-today').textContent=hoy;$('plan-goal').textContent=trainingGoal;$('plan-goal-label').textContent='de '+trainingGoal+' hoy';
+  $('goal-ring').style.setProperty('--goal',(pct*360)+'deg');
+  $('plan-day-streak').textContent=rachaDeDias();
+  $('plan-unresolved').textContent=Math.max(0,PUZZLES.length-solved.size);
+  $('plan-errors').textContent=pendientes.length;
+  const recomendado=numeroRecomendado();
+  $('plan-next-title').textContent=pendientes.length?'Repasa el ejercicio '+recomendado:'Continúa construyendo patrones';
+  $('plan-next-text').textContent=pendientes.length
+    ?'Esta posición está en tu cuaderno porque tuvo un error, una pista o la solución vista. Dos resoluciones limpias la marcarán como dominada.'
+    :'No tienes errores pendientes. El sistema te propondrá el siguiente ejercicio aún no resuelto.';
+  $('plan-message').textContent=hoy>=trainingGoal?'Meta diaria completada':'Llevas '+hoy+' de '+trainingGoal+' ejercicios únicos hoy';
+  const list=$('error-list');
+  if(!pendientes.length){list.innerHTML='<div class="error-empty">Tu cuaderno está limpio. Los ejercicios difíciles aparecerán aquí automáticamente.</div>';return;}
+  list.innerHTML=pendientes.slice(0,12).map(function(e){
+    const causa=[];if(e.errors)causa.push(e.errors+' error'+(e.errors===1?'':'es'));if(e.hints)causa.push(e.hints+' pista'+(e.hints===1?'':'s'));if(e.solutions)causa.push(e.solutions+' solución'+(e.solutions===1?'':'es'));
+    return '<button class="error-item" type="button" data-error-n="'+e.n+'"><span class="error-number">'+e.n+'</span><span class="error-copy"><strong>Ejercicio '+e.n+'</strong><span>'+causa.join(' · ')+'</span></span><span class="error-score">'+(e.clean||0)+'/2 limpias</span></button>';
+  }).join('');
+}
+
+/* Frase del día: reemplaza la dedicatoria anterior */
+const FRASES_AJEDREZ=[
+  'Golpe tras golpe sobre el mismo punto: así se graban los patrones.',
+  'Primero mira, luego calcula y, al final, mueve.',
+  'Cada ejercicio repetido es una jugada que ya no tendrás que pensar.',
+  'Busca jaques, capturas y amenazas: ahí se esconden las combinaciones.',
+  'La paciencia también es una jugada.',
+  'Una pieza mal ubicada juega a favor de tu rival.',
+  'Antes de atacar, pregúntate qué quiere hacer tu oponente.',
+  'Los peones no retroceden: piensa dos veces antes de empujarlos.',
+  'Calcular rápido empieza por reconocer lo que ya viste.',
+  'Un error repasado es una lección; un error ignorado es una costumbre.',
+  'A veces la mejor defensa es una amenaza más fuerte.',
+  'Torres en columnas abiertas, caballos en casillas fuertes, alfiles en diagonales libres.',
+  'Cuando todo parezca tranquilo, busca la jugada que lo cambie todo.',
+  'El tablero tiene 64 casillas y en cada una cabe una idea.',
+  'Pocos ejercicios cada día valen más que muchos de vez en cuando.',
+  'En el final, el rey deja de esconderse y sale a pelear.',
+  'Un caballo en el centro mira ocho casillas; en la esquina, solo dos.',
+  'Si encuentras una buena jugada, busca otra mejor.',
+  'La táctica gana partidas; la repetición te enseña a verla.',
+  'No muevas para tantear: la pieza tocada ya no vuelve.'
+];
+let fraseIndice=Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/86400000)%FRASES_AJEDREZ.length;
+function pintarFrase(animar){
+  const t=$('frase-texto');if(!t)return;
+  const poner=function(){t.textContent=FRASES_AJEDREZ[fraseIndice];t.classList.remove('cambiando');};
+  if(animar){t.classList.add('cambiando');setTimeout(poner,220);}else poner();
+}
+function prepararCaballoFrase(){
+  const c=$('frase-caballo');
+  if(c&&!c.firstChild&&typeof PIECES!=='undefined'&&PIECES.wN)c.innerHTML=PIECES.wN;
+}
+
+function planAbrir(){
+  const fondo=$('gift-modal');if(!fondo)return;
+  fondo.classList.add('open');fondo.setAttribute('aria-hidden','false');document.body.classList.add('workspace-open');
+  fondo.scrollTop=0;
+  const panel=fondo.querySelector('.workspace-shell');if(panel)panel.scrollTop=0;
+  requestAnimationFrame(function(){fondo.scrollTop=0;if(panel)panel.scrollTop=0;});
+}
+function planCerrar(){
+  const fondo=$('gift-modal');if(!fondo)return;
+  fondo.classList.remove('open');fondo.setAttribute('aria-hidden','true');
+  if(!document.querySelector('.workspace-bg.open'))document.body.classList.remove('workspace-open');
+}
+function irDesdePlan(n){if(!n)return;planCerrar();const tab=document.querySelector('.tab[data-v="train"]');if(tab)tab.click();jumpToNumber(n);}
+
+$('b-gift').onclick=()=>{renderPlanEntrenamiento();prepararCaballoFrase();pintarFrase(false);planAbrir();};
+$('b-gift-close').onclick=()=>planCerrar();
+$('gift-modal').addEventListener('click',e=>{if(e.target.id==='gift-modal')planCerrar();});
+$('frase-otra').onclick=()=>{fraseIndice=(fraseIndice+1)%FRASES_AJEDREZ.length;pintarFrase(true);};
+$('plan-continue').onclick=()=>irDesdePlan(parseInt(localStorage.getItem('wp_ultimo'),10)||(curr()&&curr().n));
+$('plan-recommended').onclick=()=>irDesdePlan(numeroRecomendado());
+$('plan-errors-start').onclick=()=>{const e=erroresPendientes()[0];if(e)irDesdePlan(e.n);};
+$('error-list').onclick=e=>{const b=e.target.closest('[data-error-n]');if(b)irDesdePlan(Number(b.getAttribute('data-error-n')));};
+$('b-goal-minus').onclick=()=>{trainingGoal=Math.max(5,trainingGoal-5);try{localStorage.setItem('wp_daily_goal',trainingGoal);}catch(e){}renderPlanEntrenamiento();};
+$('b-goal-plus').onclick=()=>{trainingGoal=Math.min(50,trainingGoal+5);try{localStorage.setItem('wp_daily_goal',trainingGoal);}catch(e){}renderPlanEntrenamiento();};
 
 $('hist-list').onclick=e=>{
   const x=e.target.closest('.hist-x');
@@ -5540,6 +5815,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='s'){$('b-sol').click();}
   else if(k==='r'){$('b-reset').click();}
   else if(k==='f'){$('b-flip').click();}
+  else if(k==='e'){$('b-explain').click();}
 });
 
 let soundOn = localStorage.getItem('wp_sound')!=='0';

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0F1411">
-<title>PC de L3</title>
+<title>PC de L1 y L2</title>
 <link rel="icon" type="image/png" href="torre.png">
 <script>
 /* Fija la apariencia antes del primer pintado. Lee localStorage y, si no hay, cookie. */
@@ -23,7 +23,7 @@
 </script>
 <style>
 /* ==================================================================
-   PC de L3 · selector de método
+   PC de L1 y L2 · selector de método
    Mismo sistema de diseño que index1 e index2: mismos tokens,
    mismas formas, mismo interruptor de apariencia.
    ================================================================== */
@@ -188,6 +188,45 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
   .menu-button,.menu-button span,.menu-button:before,.menu-button:after{transition-duration:.01ms}
   .menu-button:active,.app-choice:active{transform:none}
 }
+
+/* ---- Tutorial de bienvenida (solo usuarios nuevos) ---- */
+.tuto{position:fixed;inset:0;z-index:10990;pointer-events:none;display:none}
+.tuto.open{display:block}
+.tuto-velo{position:absolute;inset:0;background:rgba(6,9,7,.62);transition:opacity .25s}
+.tuto.con-foco .tuto-velo{opacity:0}
+.tuto-foco{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(6,9,7,.62),0 0 0 3px var(--gold);transition:left .35s cubic-bezier(.2,.8,.2,1),top .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1),height .35s cubic-bezier(.2,.8,.2,1),opacity .2s;opacity:0}
+.tuto.con-foco .tuto-foco{opacity:1}
+.tuto-foco:after{content:"";position:absolute;inset:-7px;border-radius:20px;border:2px solid var(--gold);animation:tutoPulso 1.6s ease-out infinite}
+@keyframes tutoPulso{0%{opacity:.9;transform:scale(.97)}100%{opacity:0;transform:scale(1.08)}}
+.tuto-mano{position:absolute;left:0;top:0;width:54px;height:54px;margin:-4px 0 0 -18px;font-size:46px;line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));opacity:0;transition:opacity .2s;will-change:transform}
+.tuto-mano.ver{opacity:1}
+.tuto-mano.toque{animation:tutoToque 1.25s ease-in-out infinite}
+.tuto-mano.saludo{animation:tutoSaludo 1.6s ease-in-out infinite;transform-origin:60% 90%}
+.tuto-mano.arrastre{animation:tutoArrastre 2.4s cubic-bezier(.45,.05,.3,1) infinite}
+@keyframes tutoToque{0%,100%{transform:translate(var(--x),var(--y)) scale(1)}45%{transform:translate(var(--x),calc(var(--y) + 10px)) scale(.86)}60%{transform:translate(var(--x),calc(var(--y) + 10px)) scale(.86)}}
+@keyframes tutoSaludo{0%,100%{transform:translate(var(--x),var(--y)) rotate(0)}25%{transform:translate(var(--x),var(--y)) rotate(-16deg)}75%{transform:translate(var(--x),var(--y)) rotate(16deg)}}
+@keyframes tutoArrastre{0%{transform:translate(var(--x),var(--y)) scale(1);opacity:0}10%{opacity:1}22%{transform:translate(var(--x),calc(var(--y) + 8px)) scale(.86)}70%{transform:translate(var(--x2),calc(var(--y2) + 8px)) scale(.86);opacity:1}85%{transform:translate(var(--x2),var(--y2)) scale(1);opacity:1}100%{transform:translate(var(--x2),var(--y2)) scale(1);opacity:0}}
+.tuto-ficha{position:absolute;left:0;top:0;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d9d4c6);box-shadow:0 6px 14px rgba(0,0,0,.4);display:grid;place-items:center;font-size:26px;color:#1b1b1b;opacity:0}
+.tuto-ficha.ver{animation:tutoFicha 2.4s cubic-bezier(.45,.05,.3,1) infinite}
+@keyframes tutoFicha{0%,20%{transform:translate(var(--x),var(--y));opacity:0}24%{opacity:.95}70%{transform:translate(var(--x2),var(--y2));opacity:.95}85%,100%{transform:translate(var(--x2),var(--y2));opacity:0}}
+.tuto-card{position:absolute;left:50%;width:min(92vw,400px);transform:translateX(-50%);pointer-events:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line-viva);border-radius:var(--r-box);box-shadow:var(--s4);padding:18px 18px 14px;transition:top .3s cubic-bezier(.2,.8,.2,1),bottom .3s cubic-bezier(.2,.8,.2,1)}
+.tuto-card.abajo{bottom:calc(18px + env(safe-area-inset-bottom));top:auto}
+.tuto-card.arriba{top:calc(66px + env(safe-area-inset-top));bottom:auto}
+.tuto-card.centro{top:50%;bottom:auto;transform:translate(-50%,-50%)}
+.tuto-paso{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.tuto-card h3{font-family:var(--serif);font-size:1.28rem;font-weight:600;letter-spacing:-.01em;margin:.35rem 0 .45rem}
+.tuto-card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.5}
+.tuto-puntos{display:flex;gap:6px;margin:14px 0 12px}
+.tuto-puntos i{width:7px;height:7px;border-radius:50%;background:var(--line-viva);transition:background .2s,width .2s}
+.tuto-puntos i.on{background:var(--gold);width:20px;border-radius:4px}
+.tuto-acciones{display:flex;gap:8px;align-items:center}
+.tuto-acciones button{min-height:40px;border-radius:12px;border:1px solid var(--line);background:var(--tinte-neutro);color:var(--ink);font:600 .85rem var(--sans);padding:0 14px;cursor:pointer;touch-action:manipulation}
+.tuto-acciones .tuto-sig{background:var(--gold);border-color:var(--gold);color:#1a1408;margin-left:auto}
+.tuto-acciones .tuto-cerrar{background:transparent;color:var(--muted)}
+.tuto-acciones button:disabled{opacity:.35}
+.drawer-tuto{margin:4px 2px 0;align-self:flex-start;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:var(--r-cap);padding:.45rem .9rem;font:600 .78rem var(--sans);cursor:pointer}
+.drawer-tuto:hover{color:var(--ink);border-color:var(--line-viva)}
+@media(prefers-reduced-motion:reduce){.tuto-mano,.tuto-ficha,.tuto-foco:after{animation-duration:3s}}
 </style>
 <link rel="stylesheet" href="pc-cloud-sync.css?v=1">
 </head>
@@ -197,7 +236,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Elegir aplicación">
     <div class="drawer-brand">
       <img src="torre.png" alt="Ajedrez">
-      <div><strong>PC de L3</strong><small>Dos métodos en una aplicación</small></div>
+      <div><strong>PC de L1 y L2</strong><small>Dos métodos en una aplicación</small></div>
     </div>
     <div class="tema" id="tema" role="group" aria-label="Apariencia">
       <button type="button" data-modo="claro" aria-pressed="false" title="Claro" aria-label="Apariencia: Claro"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.1"/><path d="M12 3.2v2.1M12 18.7v2.1M3.2 12h2.1M18.7 12h2.1M5.9 5.9l1.5 1.5M16.6 16.6l1.5 1.5M18.1 5.9l-1.5 1.5M7.4 16.6l-1.5 1.5"/></svg><span class="sr">Claro</span></button>
@@ -206,6 +245,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
     </div>
     <button class="app-choice active" data-app="1" type="button"><span>PC de L1<br><small>Ejercicios tácticos</small></span></button>
     <button class="app-choice" data-app="2" type="button"><span>PC de L2<br><small>Ejercicios posicionales</small></span></button>
+    <button class="drawer-tuto" id="drawer-tuto" type="button">Ver tutorial</button>
     <p class="drawer-note">El progreso de cada método se conserva de forma independiente.</p>
   </aside>
 </div>
@@ -497,6 +537,181 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
   fijarTamanoBotonDroidfish(document.getElementById('app-frame-1'));
 })();
 </script>
+<div class="tuto" id="tuto" aria-hidden="true">
+  <div class="tuto-velo"></div>
+  <div class="tuto-foco" id="tuto-foco"></div>
+  <span class="tuto-ficha" id="tuto-ficha" aria-hidden="true">♞</span>
+  <span class="tuto-mano" id="tuto-mano" aria-hidden="true">👆</span>
+  <section class="tuto-card abajo" id="tuto-card" role="dialog" aria-modal="false" aria-labelledby="tuto-titulo">
+    <span class="tuto-paso" id="tuto-paso">Paso 1</span>
+    <h3 id="tuto-titulo">Bienvenido</h3>
+    <p id="tuto-texto"></p>
+    <div class="tuto-puntos" id="tuto-puntos"></div>
+    <div class="tuto-acciones">
+      <button class="tuto-cerrar" id="tuto-cerrar" type="button">Cerrar tutorial</button>
+      <button class="tuto-atras" id="tuto-atras" type="button">Atrás</button>
+      <button class="tuto-sig" id="tuto-sig" type="button">Siguiente</button>
+    </div>
+  </section>
+</div>
 <script type="module" src="pc-cloud-sync.js?v=2"></script>
+<script>
+/* ==================================================================
+   Tutorial de bienvenida
+   - Solo aparece a quien entra por primera vez y no tiene historial.
+   - Si la persona escribe su código y se recupera su historial,
+     el tutorial no aparece (o se cierra si ya estaba abierto).
+   ================================================================== */
+(function(){
+  var KEY='pc_tutorial_visto_v1';
+  var raiz=document.getElementById('tuto');
+  var foco=document.getElementById('tuto-foco');
+  var mano=document.getElementById('tuto-mano');
+  var ficha=document.getElementById('tuto-ficha');
+  var card=document.getElementById('tuto-card');
+  var elPaso=document.getElementById('tuto-paso');
+  var elTitulo=document.getElementById('tuto-titulo');
+  var elTexto=document.getElementById('tuto-texto');
+  var elPuntos=document.getElementById('tuto-puntos');
+  var bAtras=document.getElementById('tuto-atras');
+  var bSig=document.getElementById('tuto-sig');
+  var bCerrar=document.getElementById('tuto-cerrar');
+  var abierto=false,paso=0,reloj=null,vigia=null,estable=0;
+
+  var PASOS=[
+    {titulo:'Bienvenido a PC de L1 y L2',texto:'Dos métodos de ajedrez en una sola app. En menos de un minuto te muestro qué tocar.',modo:'saludo'},
+    {titulo:'Elige tu método',texto:'Con este botón abres el menú y cambias entre PC de L1 (ejercicios tácticos) y PC de L2 (ejercicios posicionales).',padre:'menu-button',modo:'toque'},
+    {titulo:'Juega sobre el tablero',texto:'Toca una de tus piezas y arrástrala, o toca la casilla de destino. Si es la jugada correcta, el rival responde solo.',app:'board',modo:'arrastre'},
+    {titulo:'¿Te atascaste?',texto:'«Pista» ilumina la pieza que debes mover y «Ver solución» reproduce la línea completa.',app:'b-hint',modo:'toque'},
+    {titulo:'Tu entrenamiento',texto:'Aquí ves tu meta diaria, tu racha y el cuaderno de errores para repasar los ejercicios que te costaron.',app:'b-gift',modo:'toque'},
+    {titulo:'Tu código de progreso',texto:'Este botón guarda tu avance en la nube con tu código. En otro dispositivo, escribe el mismo código y recuperas todo.',padre:'pc-sync-fab',modo:'toque'},
+    {titulo:'¡Listo para entrenar!',texto:'Resuelve, repite y acelera. Puedes volver a ver esta guía desde el menú, en «Ver tutorial».',modo:'saludo',final:true}
+  ];
+
+  function leer(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  function visto(){return leer(KEY)==='1';}
+  function marcarVisto(){try{localStorage.setItem(KEY,'1');}catch(e){}}
+  function listaLlena(k){
+    try{var v=JSON.parse(leer(k)||'null');if(!v)return false;if(Array.isArray(v))return v.length>0;return typeof v==='object'&&Object.keys(v).length>0;}catch(e){return false;}
+  }
+  function tieneHistorial(){
+    return listaLlena('wp_solved')||listaLlena('wp2_solved')||listaLlena('wp_hist_log')||listaLlena('wp2_hist_log');
+  }
+  function frameActivo(){return document.querySelector('.app-frame.active');}
+  function docApp(){try{var f=frameActivo();return f&&f.contentDocument;}catch(e){return null;}}
+  function appLista(){var d=docApp();return !!(d&&d.readyState==='complete'&&d.getElementById('board'));}
+  function syncAbierto(){var bg=document.getElementById('pc-sync-modal-bg');return !!(bg&&bg.classList.contains('open'));}
+  function menuAbierto(){var b=document.getElementById('drawer-backdrop');return !!(b&&b.classList.contains('open'));}
+
+  function objetivo(p){
+    var el=null;
+    if(p.padre) el=document.getElementById(p.padre);
+    else if(p.app){var d=docApp();el=d&&d.getElementById(p.app);}
+    if(!el)return null;
+    var r=el.getBoundingClientRect();
+    if(!r.width||!r.height)return null;
+    if(p.app){
+      var f=frameActivo(),fr=f?f.getBoundingClientRect():{left:0,top:0};
+      if(r.bottom<0||r.top>window.innerHeight){try{el.scrollIntoView({block:'center'});}catch(e){}r=el.getBoundingClientRect();}
+      return {left:r.left+fr.left,top:r.top+fr.top,width:r.width,height:r.height};
+    }
+    return {left:r.left,top:r.top,width:r.width,height:r.height};
+  }
+
+  function colocar(){
+    if(!abierto)return;
+    var p=PASOS[paso],o=(p.padre||p.app)?objetivo(p):null;
+    var W=window.innerWidth,H=window.innerHeight;
+    mano.className='tuto-mano';ficha.className='tuto-ficha';
+    if(o){
+      var m=6;
+      foco.style.left=(o.left-m)+'px';foco.style.top=(o.top-m)+'px';
+      foco.style.width=(o.width+m*2)+'px';foco.style.height=(o.height+m*2)+'px';
+      raiz.classList.add('con-foco');
+      var cx=o.left+o.width/2,cy=o.top+o.height/2;
+      card.className='tuto-card '+(cy>H*0.55?'arriba':'abajo');
+      if(p.modo==='arrastre'){
+        var x1=o.left+o.width*0.35,y1=o.top+o.height*0.78,x2=o.left+o.width*0.35,y2=o.top+o.height*0.5;
+        mano.style.setProperty('--x',x1+'px');mano.style.setProperty('--y',y1+'px');
+        mano.style.setProperty('--x2',x2+'px');mano.style.setProperty('--y2',y2+'px');
+        ficha.style.setProperty('--x',x1+'px');ficha.style.setProperty('--y',y1+'px');
+        ficha.style.setProperty('--x2',x2+'px');ficha.style.setProperty('--y2',y2+'px');
+        mano.className='tuto-mano ver arrastre';ficha.className='tuto-ficha ver';
+      }else{
+        var y=Math.min(cy+o.height*0.15,H-60);
+        mano.style.setProperty('--x',cx+'px');mano.style.setProperty('--y',y+'px');
+        mano.className='tuto-mano ver toque';
+      }
+    }else{
+      raiz.classList.remove('con-foco');
+      card.className='tuto-card centro';
+      mano.style.setProperty('--x',(W/2)+'px');
+      mano.style.setProperty('--y',Math.max(40,H/2-card.offsetHeight/2-70)+'px');
+      mano.className='tuto-mano ver saludo';
+    }
+  }
+
+  function pintar(){
+    var p=PASOS[paso];
+    elPaso.textContent='Paso '+(paso+1)+' de '+PASOS.length;
+    elTitulo.textContent=p.titulo;elTexto.textContent=p.texto;
+    var h='';for(var i=0;i<PASOS.length;i++)h+='<i'+(i===paso?' class="on"':'')+'></i>';
+    elPuntos.innerHTML=h;
+    bAtras.disabled=paso===0;
+    bSig.textContent=p.final?'Empezar':'Siguiente';
+    colocar();
+  }
+
+  function abrir(desde){
+    if(abierto)return;
+    abierto=true;paso=desde||0;
+    raiz.classList.add('open');raiz.setAttribute('aria-hidden','false');
+    pintar();
+    clearInterval(reloj);reloj=setInterval(function(){
+      if(tieneHistorial()&&!raiz.dataset.manual){cerrar();return;}
+      raiz.style.visibility=syncAbierto()?'hidden':'';
+      colocar();
+    },700);
+  }
+  function cerrar(){
+    if(!abierto)return;
+    abierto=false;marcarVisto();delete raiz.dataset.manual;
+    clearInterval(reloj);
+    raiz.classList.remove('open','con-foco');raiz.setAttribute('aria-hidden','true');raiz.style.visibility='';
+  }
+  window.PCTutorial={abrir:function(){raiz.dataset.manual='1';abrir(0);},cerrar:cerrar,abierto:function(){return abierto;}};
+
+  bSig.onclick=function(){if(PASOS[paso].final){cerrar();return;}paso=Math.min(PASOS.length-1,paso+1);pintar();};
+  bAtras.onclick=function(){paso=Math.max(0,paso-1);pintar();};
+  bCerrar.onclick=cerrar;
+  window.addEventListener('resize',function(){setTimeout(colocar,60);});
+
+  var bVer=document.getElementById('drawer-tuto');
+  if(bVer)bVer.onclick=function(){
+    var bd=document.getElementById('drawer-backdrop'),mb=document.getElementById('menu-button');
+    if(bd)bd.classList.remove('open');
+    if(mb){mb.classList.remove('open');mb.setAttribute('aria-expanded','false');}
+    setTimeout(function(){window.PCTutorial.abrir();},250);
+  };
+
+  /* El botón atrás de Android cierra primero el tutorial */
+  var atrasOriginal=window.PC_ANDROID_BACK;
+  window.PC_ANDROID_BACK=function(){
+    if(abierto){cerrar();return true;}
+    return typeof atrasOriginal==='function'?atrasOriginal():true;
+  };
+
+  /* Decide si mostrarlo: espera a que se cierre la ventana del código
+     y a que cargue el tablero; si ya hay historial, no lo muestra. */
+  if(visto())return;
+  vigia=setInterval(function(){
+    if(visto()){clearInterval(vigia);return;}
+    if(tieneHistorial()){marcarVisto();clearInterval(vigia);return;}
+    if(syncAbierto()||menuAbierto()||!appLista()){estable=0;return;}
+    estable++;
+    if(estable>=3){clearInterval(vigia);abrir(0);}
+  },500);
+})();
+</script>
 </body>
 </html>

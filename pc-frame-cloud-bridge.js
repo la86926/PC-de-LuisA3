@@ -163,6 +163,12 @@
       try{ soundOn=localStorage.getItem('wp2_sound')!=='0'; }catch(e){}
     }else{
       try{
+        var g1=parseInt(localStorage.getItem('wp_daily_goal'),10);
+        trainingGoal=(g1>=5&&g1<=50)?g1:10;
+      }catch(e){}
+      try{ errorBook=loadErrorBook(); }catch(e){}
+      try{ if(typeof renderPlanEntrenamiento==='function') renderPlanEntrenamiento(); }catch(e){}
+      try{
         exThemeMode=localStorage.getItem('wp_explain_theme')||'system';
         if(typeof exAplicarTema==='function') exAplicarTema(exThemeMode);
       }catch(e){}
@@ -196,10 +202,8 @@
     try{ solved=loadSolved(); }catch(e){}
     try{ solvedAt=loadSolvedAt(); }catch(e){}
     try{ histLog=loadHistLog(); }catch(e){}
-    if(isL2){
-      try{trainingGoal=10;}catch(e){}
-      try{errorBook={};}catch(e){}
-    }
+    try{trainingGoal=10;}catch(e){}
+    try{errorBook={};}catch(e){}
     try{
       if(typeof state!=='undefined'){
         state.filter='all';
