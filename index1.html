@@ -1974,6 +1974,8 @@ html[data-modo="claro"],html[data-modo="oscuro"]{
 #status{display:none!important}
 @media(max-width:600px){.boardhead-center{align-self:start}}
 .engine-banner-toggle,.engine-banner-toggle:hover,.engine-banner-toggle[aria-pressed]{color:var(--gold);border-color:var(--gold);background:var(--tinte-oro)}
+header.topbar.topbar-anim{overflow:hidden;will-change:height,opacity,transform}
+.boardhead{transition:padding-left .34s cubic-bezier(.32,.72,0,1)}
 </style>
 </head>
 <body>
@@ -6669,17 +6671,33 @@ $('explain-modal').addEventListener('click',e=>{if(e.target.id==='explain-modal'
 window.addEventListener('popstate',()=>{if($('explain-modal').classList.contains('open')){exHistoryActive=false;exCerrarExplicacion(true);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('explain-modal').classList.contains('open')){e.preventDefault();exCerrarExplicacion(false);}});
 
-function aplicarBanner(oculto){
+let bannerAnim=null;
+function aplicarBanner(oculto,animar){
   const encabezado=document.querySelector('header.topbar'),boton=$('b-banner');
   if(!encabezado||!boton)return;
-  encabezado.style.display=oculto?'none':'';
   boton.textContent=oculto?'Mostrar':'Ocultar';
   boton.setAttribute('aria-pressed',oculto?'true':'false');
   boton.setAttribute('aria-label',oculto?'Mostrar encabezado superior':'Ocultar encabezado superior');
+  const reducir=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const props=['height','paddingTop','paddingBottom','marginTop','marginBottom','borderBottomWidth','opacity','transform'];
+  // si estaba a medio animar, parte desde donde va (sin saltos)
+  let desde=null;
+  if(bannerAnim){const cs=getComputedStyle(encabezado);desde={};props.forEach(k=>desde[k]=cs[k]);bannerAnim.cancel();bannerAnim=null;}
+  if(!animar||reducir||!encabezado.animate){encabezado.classList.remove('topbar-anim');encabezado.style.display=oculto?'none':'';return;}
+  encabezado.style.display='';
+  const cs=getComputedStyle(encabezado);
+  const lleno={height:cs.height,paddingTop:cs.paddingTop,paddingBottom:cs.paddingBottom,marginTop:cs.marginTop,marginBottom:cs.marginBottom,borderBottomWidth:cs.borderBottomWidth,opacity:'1',transform:'translateY(0px)'};
+  const vacio={height:'0px',paddingTop:'0px',paddingBottom:'0px',marginTop:'0px',marginBottom:'0px',borderBottomWidth:'0px',opacity:'0',transform:'translateY(-12px)'};
+  encabezado.classList.add('topbar-anim');
+  bannerAnim=encabezado.animate([desde||(oculto?lleno:vacio),oculto?vacio:lleno],{duration:oculto?320:380,easing:'cubic-bezier(.32,.72,0,1)'});
+  // el encabezado de la app se acomoda al mismo tiempo que se pliega la barra
+  setTimeout(()=>document.documentElement.setAttribute('data-barra',oculto?'oculta':'visible'),0);
+  const esta=bannerAnim;
+  esta.onfinish=()=>{if(bannerAnim!==esta)return;bannerAnim=null;encabezado.classList.remove('topbar-anim');if(oculto)encabezado.style.display='none';};
 }
 let bannerOculto=localStorage.getItem('wp_banner')==='1';
 aplicarBanner(bannerOculto);
-$('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_banner',bannerOculto?'1':'0');aplicarBanner(bannerOculto);};
+$('b-banner').onclick=()=>{bannerOculto=!bannerOculto;localStorage.setItem('wp_banner',bannerOculto?'1':'0');aplicarBanner(bannerOculto,true);};
 
 </script>
 
