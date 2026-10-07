@@ -55,6 +55,7 @@
   '.pc-mascota .pcm-sombra{position:absolute;left:18%;right:18%;bottom:-3%;height:8%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
   '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 2s ease-in-out infinite}' +
   '.pc-mascota svg,.pc-mascota img{width:100%;height:100%;display:block;overflow:visible;pointer-events:none;-webkit-user-drag:none}' +
+  '.pc-mascota img{object-fit:contain;object-position:50% 100%}' +
   '.pc-mascota .pcm-ala-izq{transform-box:fill-box;transform-origin:100% 15%;animation:pcmAlaI .5s ease-in-out infinite alternate}' +
   '.pc-mascota .pcm-ala-der{transform-box:fill-box;transform-origin:0% 15%;animation:pcmAlaD .5s ease-in-out infinite alternate}' +
   '.pc-mascota .pcm-cresta{transform-box:fill-box;transform-origin:30% 100%;animation:pcmCresta 1s ease-in-out infinite alternate}' +
