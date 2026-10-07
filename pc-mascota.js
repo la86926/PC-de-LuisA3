@@ -1,8 +1,9 @@
 /* PC · Mascota bailarina
    Aparece bailando sobre el tablero cuando se resuelve un ejercicio.
    - Pisa el borde inferior del tablero y mide 3 casillas de alto.
-   - Un toque: se hunde como si la empujaran y le dan cosquillas: se ríe a carcajadas.
-   - La risa se le pasa sola a los 2 segundos, o antes si la arrastras.
+   - Toca la guitarra al ritmo, con notas musicales alrededor.
+   - Un toque: levanta la guitarra con una sola ala durante 1 segundo y vuelve a tocar.
+   - Si la arrastras mientras la tiene arriba, la baja enseguida.
    - Doble toque: se cierra. La primera vez avisa con un globo de 2 segundos.
    - Desaparece al cargar otro ejercicio (siguiente, anterior, reiniciar). */
 (function(){
@@ -11,43 +12,15 @@
   window.__pcMascota = true;
 
   var ALTO_CASILLAS = 3;
-  var IMAGEN = 'mascota.png';
-  var PROPORCION = 955 / 1227;        // ancho / alto de mascota.png
+  var IMAGEN_TOCA = 'mascota.png';        // tocando la guitarra
+  var IMAGEN_ROCK = 'mascota-rock.png';   // guitarra en alto
+  // Caja del personaje (de la cresta a las patitas). Las dos imágenes comparten
+  // el mismo recorte y sobresalen de la caja para que quepa la guitarra en alto.
+  var PROPORCION = 949 / 1016;
   var CLAVE_AVISO = 'pc_mascota_aviso_doble_toque';
   var TEXTO_AVISO = 'Dame doble toque para cerrarme';
   var DOBLE_TOQUE_MS = 320;
-  var RISA_MS = 2000;
-
-  // Capa de la carcajada, en las mismas coordenadas que la imagen recortada (955 × 1227).
-  var RISA = '' +
-  '<svg class="pcm-risa" viewBox="0 0 955 1227" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
-    '<defs>' +
-      '<radialGradient id="pcmCaraI"><stop offset="80%" stop-color="#FAEEDD"/><stop offset="100%" stop-color="#FAEEDD" stop-opacity="0"/></radialGradient>' +
-      '<radialGradient id="pcmCaraD"><stop offset="80%" stop-color="#F5E6D4"/><stop offset="100%" stop-color="#F5E6D4" stop-opacity="0"/></radialGradient>' +
-      '<filter id="pcmRubor" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>' +
-    '</defs>' +
-    // tapa los ojos abiertos con el color de la cara
-    '<ellipse cx="292" cy="588" rx="100" ry="102" fill="url(#pcmCaraI)"/>' +
-    '<ellipse cx="668" cy="588" rx="100" ry="102" fill="url(#pcmCaraD)"/>' +
-    // ojos cerrados de risa
-    '<g fill="none" stroke="#3B2A26" stroke-width="22" stroke-linecap="round">' +
-      '<path d="M236 614 Q292 540 348 614"/>' +
-      '<path d="M612 614 Q668 540 724 614"/>' +
-    '</g>' +
-    // lágrimas de risa
-    '<g class="pcm-lagrimas" fill="#9FD3F5" stroke="#7BB9E6" stroke-width="3">' +
-      '<path d="M212 618 q-28 42 0 62 q28 -20 0 -62Z"/>' +
-      '<path d="M748 618 q-28 42 0 62 q28 -20 0 -62Z"/>' +
-    '</g>' +
-    // mejillas sonrojadas
-    '<ellipse cx="227" cy="700" rx="60" ry="44" fill="#FF7F98" opacity=".6" filter="url(#pcmRubor)"/>' +
-    '<ellipse cx="729" cy="697" rx="60" ry="44" fill="#FF7F98" opacity=".6" filter="url(#pcmRubor)"/>' +
-    // ¡ja! ¡ja!
-    '<g font-family="-apple-system,BlinkMacSystemFont,Avenir Next,Arial Rounded MT Bold,sans-serif" font-weight="800" fill="#FF8FA8" stroke="#fff" stroke-width="10" paint-order="stroke" text-anchor="middle">' +
-      '<text class="pcm-ja pcm-ja1" x="830" y="250" font-size="120" transform="rotate(14 830 250)">¡ja!</text>' +
-      '<text class="pcm-ja pcm-ja2" x="120" y="330" font-size="100" fill="#B9A4F2" transform="rotate(-14 120 330)">¡ja!</text>' +
-    '</g>' +
-  '</svg>';
+  var ARRIBA_MS = 1000;                   // tiempo con la guitarra en alto
 
   // Notas musicales de fiesta que suben alrededor de la mascota.
   function nota(color, doble){
@@ -64,23 +37,25 @@
   '</div>';
 
   var CSS = '' +
-  '@property --pcm-risa{syntax:"<number>";inherits:true;initial-value:0}' +
-  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-risa:0;transition:--pcm-risa .45s ease}' +
+  '@property --pcm-rock{syntax:"<number>";inherits:true;initial-value:0}' +
+  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-rock:0;transition:--pcm-rock .3s ease}' +
   '.pc-mascota,.pc-mascota *{-webkit-tap-highlight-color:transparent;outline:none}' +
   '.pc-mascota.arrastrando{cursor:grabbing}' +
-  '.pc-mascota.riendo{--pcm-risa:1}' +
+  '.pc-mascota.rockera{--pcm-rock:1}' +
   '.pc-mascota.saliendo{animation:pcmSalir .22s ease-in both;pointer-events:none}' +
-  '.pc-mascota .pcm-sombra{position:absolute;left:16%;right:16%;bottom:-2.5%;height:7%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
-  '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 2s ease-in-out infinite}' +
+  '.pc-mascota .pcm-sombra{position:absolute;left:16%;right:16%;bottom:-2.5%;height:7%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 1s ease-in-out infinite}' +
+  '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 1s ease-in-out infinite}' +
   '.pc-mascota .pcm-presion{position:absolute;inset:0;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.9,.5,1)}' +
   '.pc-mascota.presionada .pcm-presion{transform:scale(1.07,.84);transition:transform .11s ease-out}' +
-  '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmCarcajada .3s ease-in-out infinite}' +
-  '.pc-mascota img,.pc-mascota .pcm-risa{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none}' +
-  '.pc-mascota img{object-fit:contain;object-position:50% 100%}' +
-  '.pc-mascota .pcm-risa{opacity:var(--pcm-risa);overflow:visible}' +
-  '.pc-mascota .pcm-lagrimas{transform-box:fill-box;transform-origin:50% 0;animation:pcmLagrima .6s ease-in-out infinite alternate}' +
-  '.pc-mascota .pcm-ja{transform-box:fill-box;transform-origin:center;animation:pcmJa .6s ease-in-out infinite}' +
-  '.pc-mascota .pcm-ja2{animation-delay:-.3s}' +
+  '.pc-mascota .pcm-salto{position:absolute;inset:0;transform-origin:50% 100%}' +
+  '.pc-mascota .pcm-salto.salta{animation:pcmLevanta .5s ease-in-out}' +
+  '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmCelebra .5s ease-in-out infinite}' +
+  '.pc-mascota .pcm-pose{position:absolute;left:-12.223%;top:-14.567%;width:114.226%;height:114.567%;max-width:none;display:block;pointer-events:none;-webkit-user-drag:none}' +
+  // cambio de pose: la que entra aparece primero y la que sale se va después, sin transparencias raras
+  '.pc-mascota .pcm-pose.toca{opacity:1;transition:opacity .16s ease .12s}' +
+  '.pc-mascota .pcm-pose.rock{opacity:0;transition:opacity .12s ease .26s}' +
+  '.pc-mascota.rockera .pcm-pose.toca{opacity:0;transition:opacity .12s ease .26s}' +
+  '.pc-mascota.rockera .pcm-pose.rock{opacity:1;transition:opacity .16s ease .12s}' +
   '.pc-mascota .pcm-globo{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(6px) scale(.85);transform-origin:50% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
   '.pc-mascota .pcm-globo:after{content:"";position:absolute;left:50%;top:100%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}' +
   '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
@@ -97,26 +72,26 @@
   '@keyframes pcmNotaSube{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.6)}15%{opacity:1}50%{transform:translate(10px,-60%) rotate(10deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-6px,-130%) rotate(-8deg) scale(.9)}}' +
   '@keyframes pcmEntrar{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}' +
   '@keyframes pcmSalir{to{opacity:0;transform:scale(.6)}}' +
+  // tocando la guitarra: rebote al ritmo, inclinándose a un lado y al otro
   '@keyframes pcmBaile{' +
     '0%{transform:translateY(0) rotate(0) scale(1,1)}' +
-    '10%{transform:translateY(0) rotate(0) scale(1.07,.93)}' +
-    '22%{transform:translateY(-11%) rotate(-8deg) scale(.96,1.05)}' +
-    '34%{transform:translateY(0) rotate(-4deg) scale(1.06,.94)}' +
-    '50%{transform:translateY(0) rotate(0) scale(1,1)}' +
-    '60%{transform:translateY(0) rotate(0) scale(1.07,.93)}' +
-    '72%{transform:translateY(-11%) rotate(8deg) scale(.96,1.05)}' +
-    '84%{transform:translateY(0) rotate(4deg) scale(1.06,.94)}' +
+    '25%{transform:translateY(-3.5%) rotate(-3deg) scale(.98,1.025)}' +
+    '50%{transform:translateY(0) rotate(0) scale(1.035,.965)}' +
+    '75%{transform:translateY(-3.5%) rotate(3deg) scale(.98,1.025)}' +
     '100%{transform:translateY(0) rotate(0) scale(1,1)}}' +
-  '@keyframes pcmSombra{0%,10%,34%,50%,60%,84%,100%{transform:scaleX(1);opacity:1}22%,72%{transform:scaleX(.7);opacity:.55}}' +
-  // carcajada: su amplitud depende de --pcm-risa (0 = quieto, así entra y sale sin saltos)
-  '@keyframes pcmCarcajada{' +
-    '0%,100%{transform:translateY(0) rotate(0) scale(1,1)}' +
-    '25%{transform:translateY(calc(var(--pcm-risa) * -2.5%)) rotate(calc(var(--pcm-risa) * -3deg)) scale(calc(1 - var(--pcm-risa) * .02),calc(1 + var(--pcm-risa) * .03))}' +
-    '50%{transform:translateY(0) rotate(0) scale(calc(1 + var(--pcm-risa) * .04),calc(1 - var(--pcm-risa) * .04))}' +
-    '75%{transform:translateY(calc(var(--pcm-risa) * -2.5%)) rotate(calc(var(--pcm-risa) * 3deg)) scale(calc(1 - var(--pcm-risa) * .02),calc(1 + var(--pcm-risa) * .03))}}' +
-  '@keyframes pcmLagrima{from{transform:translateY(0) scale(1)}to{transform:translateY(12px) scale(1.1)}}' +
-  '@keyframes pcmJa{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.12)}}' +
-  '@media (prefers-reduced-motion:reduce){.pc-mascota .pcm-baile{animation-duration:4s}}';
+  '@keyframes pcmSombra{0%,50%,100%{transform:scaleX(1);opacity:1}25%,75%{transform:scaleX(.86);opacity:.7}}' +
+  // impulso al subir o bajar la guitarra (empieza y termina en reposo)
+  '@keyframes pcmLevanta{' +
+    '0%{transform:translateY(0) scale(1,1)}' +
+    '22%{transform:translateY(0) scale(1.07,.9)}' +
+    '50%{transform:translateY(-7%) scale(.96,1.06)}' +
+    '78%{transform:translateY(0) scale(1.03,.97)}' +
+    '100%{transform:translateY(0) scale(1,1)}}' +
+  // festejo con la guitarra en alto: su amplitud depende de --pcm-rock (0 = quieto)
+  '@keyframes pcmCelebra{' +
+    '0%,100%{transform:translateY(0) rotate(0)}' +
+    '50%{transform:translateY(calc(var(--pcm-rock) * -2.5%)) rotate(calc(var(--pcm-rock) * -2deg))}}' +
+  '@media (prefers-reduced-motion:reduce){.pc-mascota .pcm-baile,.pc-mascota .pcm-sombra{animation-duration:2s}}';
 
   var estilo = document.createElement('style');
   estilo.id = 'pc-mascota-css';
@@ -124,7 +99,7 @@
   (document.head || document.documentElement).appendChild(estilo);
 
   // precarga para que aparezca al instante
-  var precarga = new Image(); precarga.src = IMAGEN;
+  [IMAGEN_TOCA, IMAGEN_ROCK].forEach(function(src){ var i = new Image(); i.src = src; });
 
   var el = null;      // nodo de la mascota
   var dx = 0, dy = 0; // desplazamiento por arrastre, en casillas
@@ -208,9 +183,10 @@
     el.setAttribute('aria-label', 'Mascota celebrando. Doble toque para cerrarla.');
     el.innerHTML =
       '<div class="pcm-sombra"></div>' + NOTAS +
-      '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-animo">' +
-        '<img src="' + IMAGEN + '" alt="" draggable="false">' + RISA +
-      '</div></div></div>';
+      '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-salto"><div class="pcm-animo">' +
+        '<img class="pcm-pose toca" src="' + IMAGEN_TOCA + '" alt="" draggable="false">' +
+        '<img class="pcm-pose rock" src="' + IMAGEN_ROCK + '" alt="" draggable="false">' +
+      '</div></div></div></div>';
     activarInteraccion(el);
     m.cont.appendChild(el);
     colocar();
@@ -232,26 +208,34 @@
     var baile = nodo.querySelector('.pcm-baile');
     var sombra = nodo.querySelector('.pcm-sombra');
     var id = null, sx = 0, sy = 0, bx = 0, by = 0, movio = false;
-    var ultimoToque = 0, tRisa = null, tFinRisa = null, tCalma = null, riendo = false;
+    var salto = nodo.querySelector('.pcm-salto');
+    var ultimoToque = 0, tSubir = null, tBajar = null, tReanudar = null, arriba = false;
 
-    function reir(){
-      clearTimeout(tCalma);
-      clearTimeout(tFinRisa);
-      tFinRisa = setTimeout(calmar, RISA_MS);   // se le pasa sola a los 2 segundos
-      if (riendo) return;
-      riendo = true;
-      detenerSuave(baile); detenerSuave(sombra);
-      nodo.classList.add('riendo');
+    function impulso(){
+      salto.classList.remove('salta');
+      void salto.offsetWidth;
+      salto.classList.add('salta');
     }
-    function calmar(){
-      clearTimeout(tRisa); clearTimeout(tFinRisa);
-      if (!riendo) return;
-      riendo = false;
-      nodo.classList.remove('riendo');
-      // vuelve a bailar cuando la risa ya se desvaneció
-      tCalma = setTimeout(function(){ if (!riendo) { reanudar(baile); reanudar(sombra); } }, 420);
+    function subir(){
+      clearTimeout(tReanudar); clearTimeout(tBajar);
+      if (!arriba) {
+        arriba = true;
+        detenerSuave(baile); detenerSuave(sombra);
+        nodo.classList.add('rockera');
+      }
+      impulso();
+      tBajar = setTimeout(bajar, 260 + ARRIBA_MS);   // 1 segundo con la guitarra en alto
     }
-    nodo._limpiar = function(){ clearTimeout(tRisa); clearTimeout(tFinRisa); clearTimeout(tCalma); };
+    function bajar(){
+      clearTimeout(tSubir); clearTimeout(tBajar);
+      if (!arriba) return;
+      arriba = false;
+      nodo.classList.remove('rockera');
+      impulso();
+      // vuelve a tocar cuando terminó de bajar la guitarra
+      tReanudar = setTimeout(function(){ if (!arriba) { reanudar(baile); reanudar(sombra); } }, 520);
+    }
+    nodo._limpiar = function(){ clearTimeout(tSubir); clearTimeout(tBajar); clearTimeout(tReanudar); };
 
     nodo.addEventListener('pointerdown', function(e){
       if (id !== null) return;
@@ -259,7 +243,7 @@
       var ahora = Date.now();
       if (ahora - ultimoToque < DOBLE_TOQUE_MS) { ultimoToque = 0; quitar(); return; }
       ultimoToque = ahora; movio = false;
-      clearTimeout(tRisa);
+      clearTimeout(tSubir);
       id = e.pointerId; sx = e.clientX; sy = e.clientY; bx = dx; by = dy;
       try { nodo.setPointerCapture(id); } catch (err) {}
       nodo.classList.add('presionada');
@@ -272,7 +256,7 @@
         movio = true; ultimoToque = 0;
         nodo.classList.remove('presionada');
         nodo.classList.add('arrastrando');
-        calmar();
+        bajar();
       }
       if (!movio) return;
       dx = bx + (e.clientX - sx) / m.casilla;
@@ -285,8 +269,8 @@
       id = null;
       nodo.classList.remove('presionada');
       nodo.classList.remove('arrastrando');
-      // un toque sin arrastrar: cosquillas (espera un instante por si es doble toque)
-      if (!movio && e.type === 'pointerup') tRisa = setTimeout(reir, DOBLE_TOQUE_MS - 60);
+      // un toque sin arrastrar: levanta la guitarra (espera un instante por si es doble toque)
+      if (!movio && e.type === 'pointerup') tSubir = setTimeout(subir, DOBLE_TOQUE_MS - 60);
     }
     nodo.addEventListener('pointerup', soltar);
     nodo.addEventListener('pointercancel', soltar);
