@@ -1,74 +1,75 @@
 /* PC · Mascota bailarina
    Aparece bailando sobre el tablero cuando se resuelve un ejercicio.
-   - Pisa el borde inferior del tablero (fila de abajo) y mide 3 casillas de alto.
-   - Se puede arrastrar con el dedo o el mouse.
-   - Desaparece al cargar otro ejercicio (siguiente, anterior, reiniciar).
-   - El baile es un ciclo de 2 segundos que se repite.
-   Si existe mascota.png en la misma carpeta, se usa esa imagen;
-   si no, se dibuja la mascota original en SVG que va aquí abajo. */
+   - Pisa el borde inferior del tablero y mide 3 casillas de alto.
+   - Un toque: se hunde como si la empujaran y se enoja.
+   - Si está enojada y la arrastras, se calma y vuelve a bailar.
+   - Doble toque: se cierra. La primera vez avisa con un globo de 2 segundos.
+   - Desaparece al cargar otro ejercicio (siguiente, anterior, reiniciar). */
 (function(){
   'use strict';
   if (window.__pcMascota) return;
   window.__pcMascota = true;
 
-  var ALTO_CASILLAS = 3;      // alto de la mascota en casillas
-  var PROPORCION = 0.84;      // ancho / alto
-  var IMAGEN = 'mascota.png'; // imagen opcional (fondo transparente)
+  var ALTO_CASILLAS = 3;
+  var IMAGEN = 'mascota.png';
+  var PROPORCION = 955 / 1227;        // ancho / alto de mascota.png
+  var CLAVE_AVISO = 'pc_mascota_aviso_doble_toque';
+  var TEXTO_AVISO = 'Dame doble toque para cerrarme';
+  var DOBLE_TOQUE_MS = 320;
 
-  var SVG = '' +
-  '<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<g class="pcm-cuerpo">' +
-      '<g class="pcm-cola"><path d="M64 178 C40 196 36 214 44 226 C56 214 66 204 78 196Z" fill="#7FB8E6"/></g>' +
-      '<g class="pcm-pies">' +
-        '<path d="M74 222 q-4 12 -14 16 h28 q-2 -8 -4 -16Z" fill="#FFD77A"/>' +
-        '<path d="M126 222 q4 12 14 16 h-28 q2 -8 4 -16Z" fill="#FFD77A"/>' +
-      '</g>' +
-      '<ellipse cx="100" cy="150" rx="66" ry="78" fill="#A9D6F5"/>' +
-      '<ellipse cx="100" cy="172" rx="44" ry="50" fill="#FFF6E3"/>' +
-      '<g class="pcm-ala-izq"><path d="M40 140 C14 146 8 176 22 196 C38 190 50 170 52 150Z" fill="#8CC4EC"/></g>' +
-      '<g class="pcm-ala-der"><path d="M160 140 C186 146 192 176 178 196 C162 190 150 170 148 150Z" fill="#8CC4EC"/></g>' +
-      '<g class="pcm-cresta">' +
-        '<path d="M100 70 C92 46 98 28 112 18 C112 36 116 50 112 70Z" fill="#FF9FB0"/>' +
-        '<path d="M92 72 C80 54 80 38 88 28 C92 44 98 56 102 70Z" fill="#FFB8C6"/>' +
-        '<path d="M110 72 C120 56 132 50 142 52 C134 60 126 68 118 76Z" fill="#FFB8C6"/>' +
-      '</g>' +
-      '<g class="pcm-ojos">' +
-        '<ellipse cx="76" cy="126" rx="11" ry="14" fill="#2B2B33"/>' +
-        '<ellipse cx="124" cy="126" rx="11" ry="14" fill="#2B2B33"/>' +
-        '<circle cx="80" cy="120" r="4.2" fill="#fff"/><circle cx="73" cy="131" r="2" fill="#fff"/>' +
-        '<circle cx="128" cy="120" r="4.2" fill="#fff"/><circle cx="121" cy="131" r="2" fill="#fff"/>' +
-      '</g>' +
-      '<ellipse cx="58" cy="148" rx="11" ry="7" fill="#FFB8C6" opacity=".85"/>' +
-      '<ellipse cx="142" cy="148" rx="11" ry="7" fill="#FFB8C6" opacity=".85"/>' +
-      '<path d="M88 142 Q100 136 112 142 Q104 158 100 160 Q96 158 88 142Z" fill="#FFE08A"/>' +
-      '<path d="M93 146 Q100 151 107 146" fill="none" stroke="#E8B94E" stroke-width="2" stroke-linecap="round"/>' +
-      '<path d="M100 184 l-6 -6 a4.2 4.2 0 0 1 6 -6 a4.2 4.2 0 0 1 6 6Z" fill="#FF9FB0"/>' +
+  // Capa del enojo, en las mismas coordenadas que la imagen recortada (955 × 1227).
+  var ENOJO = '' +
+  '<svg class="pcm-enojo" viewBox="0 0 955 1227" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
+    '<defs><filter id="pcmSuave" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>' +
+    '<filter id="pcmRubor" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>' +
+    '<filter id="pcmLeve" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.5"/></filter></defs>' +
+    // tapa las cejas alegres con el color de la cara
+    '<ellipse cx="281" cy="449" rx="44" ry="27" fill="#FCF1E1" filter="url(#pcmSuave)"/>' +
+    '<ellipse cx="679" cy="449" rx="44" ry="27" fill="#F9EDDD" filter="url(#pcmSuave)"/>' +
+    // cejas fruncidas
+    '<g class="pcm-cejas">' +
+      '<path d="M232 438 Q285 452 330 486" fill="none" stroke="#3B2A26" stroke-width="17" stroke-linecap="round"/>' +
+      '<path d="M723 438 Q670 452 625 486" fill="none" stroke="#3B2A26" stroke-width="17" stroke-linecap="round"/>' +
     '</g>' +
-    '<g class="pcm-nota pcm-n1"><path d="M30 60 v-22 l14 -4 v20" fill="none" stroke="#C3B1F0" stroke-width="3" stroke-linecap="round"/><circle cx="27" cy="61" r="5" fill="#C3B1F0"/><circle cx="41" cy="55" r="5" fill="#C3B1F0"/></g>' +
-    '<g class="pcm-nota pcm-n2"><path d="M168 46 v-20" fill="none" stroke="#FF9FB0" stroke-width="3" stroke-linecap="round"/><path d="M168 26 q10 4 8 14" fill="none" stroke="#FF9FB0" stroke-width="3" stroke-linecap="round"/><circle cx="164" cy="47" r="5" fill="#FF9FB0"/></g>' +
+    // boca cerrada en puchero (tapa la sonrisa abierta)
+    '<g class="pcm-boca">' +
+      '<path d="M414 651 Q483 628 552 651 Q546 690 483 708 Q420 690 414 651Z" fill="#FAC862" filter="url(#pcmLeve)"/>' +
+      '<path d="M432 664 Q483 646 534 664" fill="none" stroke="#DB9A45" stroke-width="7" stroke-linecap="round"/>' +
+    '</g>' +
+    // mejillas más rojas
+    '<ellipse cx="227" cy="692" rx="58" ry="44" fill="#FF6F88" opacity=".7" filter="url(#pcmRubor)"/>' +
+    '<ellipse cx="729" cy="689" rx="58" ry="44" fill="#FF6F88" opacity=".7" filter="url(#pcmRubor)"/>' +
+    // símbolo de enojo
+    '<g class="pcm-vena" transform="translate(770 300) scale(1.7)">' +
+      '<g fill="none" stroke="#FF5C77" stroke-width="15" stroke-linecap="round">' +
+        '<path d="M-14 -44 Q-12 -14 -44 -14"/><path d="M14 -44 Q12 -14 44 -14"/>' +
+        '<path d="M-14 44 Q-12 14 -44 14"/><path d="M14 44 Q12 14 44 14"/>' +
+      '</g>' +
+    '</g>' +
   '</svg>';
 
   var CSS = '' +
-  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both}' +
+  '@property --pcm-enojo{syntax:"<number>";inherits:true;initial-value:0}' +
+  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-enojo:0;transition:--pcm-enojo .45s ease}' +
   '.pc-mascota,.pc-mascota *{-webkit-tap-highlight-color:transparent;outline:none}' +
   '.pc-mascota.arrastrando{cursor:grabbing}' +
-  '.pc-mascota .pcm-cerrar{position:absolute;top:2%;right:-4%;width:40px;height:40px;margin:0;padding:0;border:0;background:none;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;touch-action:manipulation}' +
-  '.pc-mascota .pcm-cerrar span{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.88);border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 6px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#55555c;transition:transform .15s}' +
-  '.pc-mascota .pcm-cerrar:active span{transform:scale(.88)}' +
-  '.pc-mascota .pcm-cerrar svg{width:12px;height:12px}' +
-  'html[data-modo="oscuro"] .pc-mascota .pcm-cerrar span{background:rgba(44,44,48,.9);border-color:rgba(255,255,255,.16);color:#d8d8de}' +
+  '.pc-mascota.enojada{--pcm-enojo:1}' +
   '.pc-mascota.saliendo{animation:pcmSalir .22s ease-in both;pointer-events:none}' +
-  '.pc-mascota .pcm-sombra{position:absolute;left:18%;right:18%;bottom:-3%;height:8%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
+  '.pc-mascota .pcm-sombra{position:absolute;left:16%;right:16%;bottom:-2.5%;height:7%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
   '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 2s ease-in-out infinite}' +
-  '.pc-mascota svg,.pc-mascota img{width:100%;height:100%;display:block;overflow:visible;pointer-events:none;-webkit-user-drag:none}' +
+  '.pc-mascota .pcm-presion{position:absolute;inset:0;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.9,.5,1)}' +
+  '.pc-mascota.presionada .pcm-presion{transform:scale(1.07,.84);transition:transform .11s ease-out}' +
+  '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmResopla .9s ease-in-out infinite}' +
+  '.pc-mascota img,.pc-mascota .pcm-enojo{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none}' +
   '.pc-mascota img{object-fit:contain;object-position:50% 100%}' +
-  '.pc-mascota .pcm-ala-izq{transform-box:fill-box;transform-origin:100% 15%;animation:pcmAlaI .5s ease-in-out infinite alternate}' +
-  '.pc-mascota .pcm-ala-der{transform-box:fill-box;transform-origin:0% 15%;animation:pcmAlaD .5s ease-in-out infinite alternate}' +
-  '.pc-mascota .pcm-cresta{transform-box:fill-box;transform-origin:30% 100%;animation:pcmCresta 1s ease-in-out infinite alternate}' +
-  '.pc-mascota .pcm-ojos{transform-box:fill-box;transform-origin:50% 50%;animation:pcmParpadeo 2s infinite}' +
-  '.pc-mascota .pcm-cola{transform-box:fill-box;transform-origin:100% 0%;animation:pcmCola .5s ease-in-out infinite alternate}' +
-  '.pc-mascota .pcm-nota{animation:pcmNota 2s ease-in-out infinite}' +
-  '.pc-mascota .pcm-n2{animation-delay:-1s}' +
+  '.pc-mascota .pcm-enojo{opacity:var(--pcm-enojo);overflow:visible}' +
+  '.pc-mascota .pcm-cejas{transform:translateY(calc((1 - var(--pcm-enojo)) * -30px))}' +
+  '.pc-mascota .pcm-vena>g{transform-box:fill-box;transform-origin:center;transform:scale(calc(.4 + var(--pcm-enojo) * .6));animation:pcmVena .7s ease-in-out infinite}' +
+  '.pc-mascota .pcm-globo{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(6px) scale(.85);transform-origin:50% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
+  '.pc-mascota .pcm-globo:after{content:"";position:absolute;left:50%;top:100%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}' +
+  '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
+  'html[data-modo="oscuro"] .pc-mascota .pcm-globo{background:#2c2c30;color:#f2f2f5;box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}' +
+  'html[data-modo="oscuro"] .pc-mascota .pcm-globo:after{border-top-color:#2c2c30}' +
   '@keyframes pcmEntrar{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}' +
   '@keyframes pcmSalir{to{opacity:0;transform:scale(.6)}}' +
   '@keyframes pcmBaile{' +
@@ -82,12 +83,14 @@
     '84%{transform:translateY(0) rotate(4deg) scale(1.06,.94)}' +
     '100%{transform:translateY(0) rotate(0) scale(1,1)}}' +
   '@keyframes pcmSombra{0%,10%,34%,50%,60%,84%,100%{transform:scaleX(1);opacity:1}22%,72%{transform:scaleX(.7);opacity:.55}}' +
-  '@keyframes pcmAlaI{from{transform:rotate(12deg)}to{transform:rotate(-38deg)}}' +
-  '@keyframes pcmAlaD{from{transform:rotate(-12deg)}to{transform:rotate(38deg)}}' +
-  '@keyframes pcmCresta{from{transform:rotate(-7deg)}to{transform:rotate(9deg)}}' +
-  '@keyframes pcmCola{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}' +
-  '@keyframes pcmParpadeo{0%,44%,50%,100%{transform:scaleY(1)}47%{transform:scaleY(.1)}}' +
-  '@keyframes pcmNota{0%{opacity:0;transform:translateY(10px)}25%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translateY(-16px)}}' +
+  // resoplido de enojo: su amplitud depende de --pcm-enojo (0 = quieto, sin saltos)
+  '@keyframes pcmResopla{' +
+    '0%,100%{transform:translateX(0) scale(1,1)}' +
+    '20%{transform:translateX(calc(var(--pcm-enojo) * -1.2%)) scale(calc(1 + var(--pcm-enojo) * .035),calc(1 - var(--pcm-enojo) * .03))}' +
+    '40%{transform:translateX(calc(var(--pcm-enojo) * 1.2%)) scale(1,1)}' +
+    '60%{transform:translateX(calc(var(--pcm-enojo) * -.8%)) scale(calc(1 + var(--pcm-enojo) * .02),calc(1 - var(--pcm-enojo) * .02))}' +
+    '80%{transform:translateX(calc(var(--pcm-enojo) * .8%)) scale(1,1)}}' +
+  '@keyframes pcmVena{0%,100%{scale:1}50%{scale:1.14}}' +
   '@media (prefers-reduced-motion:reduce){.pc-mascota .pcm-baile{animation-duration:4s}}';
 
   var estilo = document.createElement('style');
@@ -95,11 +98,8 @@
   estilo.textContent = CSS;
   (document.head || document.documentElement).appendChild(estilo);
 
-  // ¿Hay una imagen propia (mascota.png)? Se comprueba una sola vez.
-  var usarImagen = false;
-  var prueba = new Image();
-  prueba.onload = function(){ usarImagen = prueba.naturalWidth > 0; };
-  prueba.src = IMAGEN;
+  // precarga para que aparezca al instante
+  var precarga = new Image(); precarga.src = IMAGEN;
 
   var el = null;      // nodo de la mascota
   var dx = 0, dy = 0; // desplazamiento por arrastre, en casillas
@@ -116,22 +116,18 @@
     var alto = casilla * ALTO_CASILLAS, ancho = alto * PROPORCION;
     return {
       cont: cont, rb: rb, rc: rc, casilla: casilla, alto: alto, ancho: ancho,
-      // centrado horizontal y con los pies en el borde inferior del tablero
       x0: rb.left - rc.left + (rb.width - ancho) / 2,
       y0: rb.bottom - rc.top - alto
     };
   }
 
   function limitar(m){
-    // que no se salga del recuadro del tablero
-    var minX = rb0(m).left, maxX = rb0(m).left + m.rb.width - m.ancho;
-    var minY = rb0(m).top,  maxY = rb0(m).top + m.rb.height - m.alto;
-    var x = Math.min(maxX, Math.max(minX, m.x0 + dx * m.casilla));
-    var y = Math.min(maxY, Math.max(minY, m.y0 + dy * m.casilla));
+    var bl = m.rb.left - m.rc.left, bt = m.rb.top - m.rc.top;
+    var x = Math.min(bl + m.rb.width - m.ancho, Math.max(bl, m.x0 + dx * m.casilla));
+    var y = Math.min(bt + m.rb.height - m.alto, Math.max(bt, m.y0 + dy * m.casilla));
     dx = (x - m.x0) / m.casilla; dy = (y - m.y0) / m.casilla;
     return { x: x, y: y };
   }
-  function rb0(m){ return { left: m.rb.left - m.rc.left, top: m.rb.top - m.rc.top }; }
 
   function colocar(){
     if (!el) return;
@@ -148,57 +144,109 @@
   function quitar(){
     if (!el) return;
     var viejo = el; el = null;
+    if (viejo._limpiar) viejo._limpiar();
     viejo.classList.add('saliendo');
     setTimeout(function(){ if (viejo.parentElement) viejo.parentElement.removeChild(viejo); }, 240);
   }
 
+  // Detiene una animación CSS desde la pose en que está y la lleva suave a reposo.
+  function detenerSuave(nodo){
+    var cs = getComputedStyle(nodo);
+    nodo.style.transform = cs.transform === 'none' ? '' : cs.transform;
+    nodo.style.opacity = cs.opacity;
+    nodo.style.animation = 'none';
+    void nodo.offsetWidth;
+    nodo.style.transition = 'transform .35s ease-out, opacity .35s ease-out';
+    nodo.style.transform = 'none';
+    nodo.style.opacity = '1';
+  }
+  // Reanuda desde el inicio del ciclo, que es la pose de reposo: no hay salto.
+  function reanudar(nodo){
+    nodo.style.transition = '';
+    nodo.style.transform = '';
+    nodo.style.opacity = '';
+    nodo.style.animation = '';
+  }
+
+  function avisoVisto(){ try { return localStorage.getItem(CLAVE_AVISO) === '1'; } catch (e) { return true; } }
+  function marcarAviso(){ try { localStorage.setItem(CLAVE_AVISO, '1'); } catch (e) {} }
+
   function mostrar(){
-    if (el) { el.parentElement && el.parentElement.removeChild(el); el = null; }
+    if (el) { if (el._limpiar) el._limpiar(); el.parentElement && el.parentElement.removeChild(el); el = null; }
     var m = medidas();
     if (!m) return;
     dx = 0; dy = 0;
     el = document.createElement('div');
     el.className = 'pc-mascota';
     el.setAttribute('role', 'img');
-    el.setAttribute('aria-label', 'Mascota celebrando');
-    var dibujo = usarImagen
-      ? '<img src="' + IMAGEN + '" alt="" draggable="false">'
-      : SVG;
-    el.innerHTML = '<div class="pcm-sombra"></div><div class="pcm-baile">' + dibujo + '</div>' +
-      '<button type="button" class="pcm-cerrar" aria-label="Cerrar mascota"><span>' +
-      '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg>' +
-      '</span></button>';
-    activarCerrar(el.querySelector('.pcm-cerrar'));
-    activarArrastre(el);
+    el.setAttribute('aria-label', 'Mascota celebrando. Doble toque para cerrarla.');
+    el.innerHTML =
+      '<div class="pcm-sombra"></div>' +
+      '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-animo">' +
+        '<img src="' + IMAGEN + '" alt="" draggable="false">' + ENOJO +
+      '</div></div></div>';
+    activarInteraccion(el);
     m.cont.appendChild(el);
     colocar();
+
+    if (!avisoVisto()) {
+      marcarAviso();
+      var globo = document.createElement('div');
+      globo.className = 'pcm-globo';
+      globo.textContent = TEXTO_AVISO;
+      el.appendChild(globo);
+      var nodo = el;
+      setTimeout(function(){ globo.classList.add('visible'); }, 450);
+      setTimeout(function(){ globo.classList.remove('visible'); }, 450 + 2000);
+      setTimeout(function(){ if (globo.parentElement === nodo) nodo.removeChild(globo); }, 450 + 2000 + 400);
+    }
   }
 
-  function activarCerrar(boton){
-    // el botón no inicia el arrastre ni llega al tablero
-    ['pointerdown','pointermove','mousedown','touchstart'].forEach(function(t){
-      boton.addEventListener(t, function(e){ e.stopPropagation(); }, { passive: true });
-    });
-    boton.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); quitar(); });
-  }
+  function activarInteraccion(nodo){
+    var baile = nodo.querySelector('.pcm-baile');
+    var sombra = nodo.querySelector('.pcm-sombra');
+    var id = null, sx = 0, sy = 0, bx = 0, by = 0, movio = false;
+    var ultimoToque = 0, tEnojo = null, tCalma = null, enojada = false;
 
-  function activarArrastre(nodo){
-    var id = null, sx = 0, sy = 0, bx = 0, by = 0, ultimoToque = 0, movio = false;
+    function enojar(){
+      clearTimeout(tCalma);
+      if (enojada) return;
+      enojada = true;
+      detenerSuave(baile); detenerSuave(sombra);
+      nodo.classList.add('enojada');
+    }
+    function calmar(){
+      clearTimeout(tEnojo);
+      if (!enojada) return;
+      enojada = false;
+      nodo.classList.remove('enojada');
+      // vuelve a bailar cuando el enojo ya se desvaneció
+      tCalma = setTimeout(function(){ if (!enojada) { reanudar(baile); reanudar(sombra); } }, 420);
+    }
+    nodo._limpiar = function(){ clearTimeout(tEnojo); clearTimeout(tCalma); };
+
     nodo.addEventListener('pointerdown', function(e){
       if (id !== null) return;
       e.preventDefault(); e.stopPropagation();
       var ahora = Date.now();
-      if (ahora - ultimoToque < 320) { ultimoToque = 0; quitar(); return; } // doble toque: cerrar
+      if (ahora - ultimoToque < DOBLE_TOQUE_MS) { ultimoToque = 0; quitar(); return; }
       ultimoToque = ahora; movio = false;
+      clearTimeout(tEnojo);
       id = e.pointerId; sx = e.clientX; sy = e.clientY; bx = dx; by = dy;
       try { nodo.setPointerCapture(id); } catch (err) {}
-      nodo.classList.add('arrastrando');
+      nodo.classList.add('presionada');
     });
     nodo.addEventListener('pointermove', function(e){
       if (e.pointerId !== id) return;
       e.preventDefault(); e.stopPropagation();
       var m = medidas(); if (!m) return;
-      if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8) { movio = true; ultimoToque = 0; }
+      if (!movio && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8) {
+        movio = true; ultimoToque = 0;
+        nodo.classList.remove('presionada');
+        nodo.classList.add('arrastrando');
+        calmar();
+      }
+      if (!movio) return;
       dx = bx + (e.clientX - sx) / m.casilla;
       dy = by + (e.clientY - sy) / m.casilla;
       colocar();
@@ -207,13 +255,16 @@
       if (e.pointerId !== id) return;
       e.stopPropagation();
       id = null;
+      nodo.classList.remove('presionada');
       nodo.classList.remove('arrastrando');
+      // un toque sin arrastrar: se enoja (espera un instante por si es doble toque)
+      if (!movio && e.type === 'pointerup') tEnojo = setTimeout(enojar, DOBLE_TOQUE_MS - 60);
     }
     nodo.addEventListener('pointerup', soltar);
     nodo.addEventListener('pointercancel', soltar);
-    // evita que el toque llegue al tablero (selección de piezas, flechas)
-    ['mousedown','touchstart','click','contextmenu'].forEach(function(t){
-      nodo.addEventListener(t, function(e){ e.stopPropagation(); if (t === 'contextmenu') e.preventDefault(); }, { passive: false });
+    // que el toque no llegue al tablero (selección de piezas, flechas)
+    ['mousedown','touchstart','click','dblclick','contextmenu'].forEach(function(t){
+      nodo.addEventListener(t, function(e){ e.stopPropagation(); if (t !== 'mousedown' && t !== 'touchstart') e.preventDefault(); }, { passive: false });
     });
   }
 
