@@ -1,8 +1,8 @@
 /* PC · Mascota bailarina
    Aparece bailando sobre el tablero cuando se resuelve un ejercicio.
    - Pisa el borde inferior del tablero y mide 3 casillas de alto.
-   - Un toque: se hunde como si la empujaran y se enoja.
-   - Si está enojada y la arrastras, se calma y vuelve a bailar.
+   - Un toque: se hunde como si la empujaran y le dan cosquillas: se ríe a carcajadas.
+   - La risa se le pasa sola a los 2 segundos, o antes si la arrastras.
    - Doble toque: se cierra. La primera vez avisa con un globo de 2 segundos.
    - Desaparece al cargar otro ejercicio (siguiente, anterior, reiniciar). */
 (function(){
@@ -16,55 +16,57 @@
   var CLAVE_AVISO = 'pc_mascota_aviso_doble_toque';
   var TEXTO_AVISO = 'Dame doble toque para cerrarme';
   var DOBLE_TOQUE_MS = 320;
+  var RISA_MS = 2000;
 
-  // Capa del enojo, en las mismas coordenadas que la imagen recortada (955 × 1227).
-  var ENOJO = '' +
-  '<svg class="pcm-enojo" viewBox="0 0 955 1227" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
-    '<defs><filter id="pcmSuave" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>' +
-    '<filter id="pcmRubor" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>' +
-    '<filter id="pcmLeve" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.5"/></filter></defs>' +
-    // tapa las cejas alegres con el color de la cara
-    '<ellipse cx="281" cy="449" rx="44" ry="27" fill="#FCF1E1" filter="url(#pcmSuave)"/>' +
-    '<ellipse cx="679" cy="449" rx="44" ry="27" fill="#F9EDDD" filter="url(#pcmSuave)"/>' +
-    // cejas fruncidas
-    '<g class="pcm-cejas">' +
-      '<path d="M232 438 Q285 452 330 486" fill="none" stroke="#3B2A26" stroke-width="17" stroke-linecap="round"/>' +
-      '<path d="M723 438 Q670 452 625 486" fill="none" stroke="#3B2A26" stroke-width="17" stroke-linecap="round"/>' +
+  // Capa de la carcajada, en las mismas coordenadas que la imagen recortada (955 × 1227).
+  var RISA = '' +
+  '<svg class="pcm-risa" viewBox="0 0 955 1227" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
+    '<defs>' +
+      '<radialGradient id="pcmCaraI"><stop offset="80%" stop-color="#FAEEDD"/><stop offset="100%" stop-color="#FAEEDD" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="pcmCaraD"><stop offset="80%" stop-color="#F5E6D4"/><stop offset="100%" stop-color="#F5E6D4" stop-opacity="0"/></radialGradient>' +
+      '<filter id="pcmRubor" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>' +
+    '</defs>' +
+    // tapa los ojos abiertos con el color de la cara
+    '<ellipse cx="292" cy="588" rx="100" ry="102" fill="url(#pcmCaraI)"/>' +
+    '<ellipse cx="668" cy="588" rx="100" ry="102" fill="url(#pcmCaraD)"/>' +
+    // ojos cerrados de risa
+    '<g fill="none" stroke="#3B2A26" stroke-width="22" stroke-linecap="round">' +
+      '<path d="M236 614 Q292 540 348 614"/>' +
+      '<path d="M612 614 Q668 540 724 614"/>' +
     '</g>' +
-    // boca cerrada en puchero (tapa la sonrisa abierta)
-    '<g class="pcm-boca">' +
-      '<path d="M414 651 Q483 628 552 651 Q546 690 483 708 Q420 690 414 651Z" fill="#FAC862" filter="url(#pcmLeve)"/>' +
-      '<path d="M432 664 Q483 646 534 664" fill="none" stroke="#DB9A45" stroke-width="7" stroke-linecap="round"/>' +
+    // lágrimas de risa
+    '<g class="pcm-lagrimas" fill="#9FD3F5" stroke="#7BB9E6" stroke-width="3">' +
+      '<path d="M212 618 q-28 42 0 62 q28 -20 0 -62Z"/>' +
+      '<path d="M748 618 q-28 42 0 62 q28 -20 0 -62Z"/>' +
     '</g>' +
-    // mejillas más rojas
-    '<ellipse cx="227" cy="692" rx="58" ry="44" fill="#FF6F88" opacity=".7" filter="url(#pcmRubor)"/>' +
-    '<ellipse cx="729" cy="689" rx="58" ry="44" fill="#FF6F88" opacity=".7" filter="url(#pcmRubor)"/>' +
-    // símbolo de enojo
-    '<g class="pcm-vena" transform="translate(770 300) scale(1.7)">' +
-      '<g fill="none" stroke="#FF5C77" stroke-width="15" stroke-linecap="round">' +
-        '<path d="M-14 -44 Q-12 -14 -44 -14"/><path d="M14 -44 Q12 -14 44 -14"/>' +
-        '<path d="M-14 44 Q-12 14 -44 14"/><path d="M14 44 Q12 14 44 14"/>' +
-      '</g>' +
+    // mejillas sonrojadas
+    '<ellipse cx="227" cy="700" rx="60" ry="44" fill="#FF7F98" opacity=".6" filter="url(#pcmRubor)"/>' +
+    '<ellipse cx="729" cy="697" rx="60" ry="44" fill="#FF7F98" opacity=".6" filter="url(#pcmRubor)"/>' +
+    // ¡ja! ¡ja!
+    '<g font-family="-apple-system,BlinkMacSystemFont,Avenir Next,Arial Rounded MT Bold,sans-serif" font-weight="800" fill="#FF8FA8" stroke="#fff" stroke-width="10" paint-order="stroke" text-anchor="middle">' +
+      '<text class="pcm-ja pcm-ja1" x="830" y="250" font-size="120" transform="rotate(14 830 250)">¡ja!</text>' +
+      '<text class="pcm-ja pcm-ja2" x="120" y="330" font-size="100" fill="#B9A4F2" transform="rotate(-14 120 330)">¡ja!</text>' +
     '</g>' +
   '</svg>';
 
   var CSS = '' +
-  '@property --pcm-enojo{syntax:"<number>";inherits:true;initial-value:0}' +
-  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-enojo:0;transition:--pcm-enojo .45s ease}' +
+  '@property --pcm-risa{syntax:"<number>";inherits:true;initial-value:0}' +
+  '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-risa:0;transition:--pcm-risa .45s ease}' +
   '.pc-mascota,.pc-mascota *{-webkit-tap-highlight-color:transparent;outline:none}' +
   '.pc-mascota.arrastrando{cursor:grabbing}' +
-  '.pc-mascota.enojada{--pcm-enojo:1}' +
+  '.pc-mascota.riendo{--pcm-risa:1}' +
   '.pc-mascota.saliendo{animation:pcmSalir .22s ease-in both;pointer-events:none}' +
   '.pc-mascota .pcm-sombra{position:absolute;left:16%;right:16%;bottom:-2.5%;height:7%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
   '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 2s ease-in-out infinite}' +
   '.pc-mascota .pcm-presion{position:absolute;inset:0;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.9,.5,1)}' +
   '.pc-mascota.presionada .pcm-presion{transform:scale(1.07,.84);transition:transform .11s ease-out}' +
-  '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmResopla .9s ease-in-out infinite}' +
-  '.pc-mascota img,.pc-mascota .pcm-enojo{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none}' +
+  '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmCarcajada .3s ease-in-out infinite}' +
+  '.pc-mascota img,.pc-mascota .pcm-risa{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none}' +
   '.pc-mascota img{object-fit:contain;object-position:50% 100%}' +
-  '.pc-mascota .pcm-enojo{opacity:var(--pcm-enojo);overflow:visible}' +
-  '.pc-mascota .pcm-cejas{transform:translateY(calc((1 - var(--pcm-enojo)) * -30px))}' +
-  '.pc-mascota .pcm-vena>g{transform-box:fill-box;transform-origin:center;transform:scale(calc(.4 + var(--pcm-enojo) * .6));animation:pcmVena .7s ease-in-out infinite}' +
+  '.pc-mascota .pcm-risa{opacity:var(--pcm-risa);overflow:visible}' +
+  '.pc-mascota .pcm-lagrimas{transform-box:fill-box;transform-origin:50% 0;animation:pcmLagrima .6s ease-in-out infinite alternate}' +
+  '.pc-mascota .pcm-ja{transform-box:fill-box;transform-origin:center;animation:pcmJa .6s ease-in-out infinite}' +
+  '.pc-mascota .pcm-ja2{animation-delay:-.3s}' +
   '.pc-mascota .pcm-globo{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(6px) scale(.85);transform-origin:50% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
   '.pc-mascota .pcm-globo:after{content:"";position:absolute;left:50%;top:100%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}' +
   '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
@@ -83,14 +85,14 @@
     '84%{transform:translateY(0) rotate(4deg) scale(1.06,.94)}' +
     '100%{transform:translateY(0) rotate(0) scale(1,1)}}' +
   '@keyframes pcmSombra{0%,10%,34%,50%,60%,84%,100%{transform:scaleX(1);opacity:1}22%,72%{transform:scaleX(.7);opacity:.55}}' +
-  // resoplido de enojo: su amplitud depende de --pcm-enojo (0 = quieto, sin saltos)
-  '@keyframes pcmResopla{' +
-    '0%,100%{transform:translateX(0) scale(1,1)}' +
-    '20%{transform:translateX(calc(var(--pcm-enojo) * -1.2%)) scale(calc(1 + var(--pcm-enojo) * .035),calc(1 - var(--pcm-enojo) * .03))}' +
-    '40%{transform:translateX(calc(var(--pcm-enojo) * 1.2%)) scale(1,1)}' +
-    '60%{transform:translateX(calc(var(--pcm-enojo) * -.8%)) scale(calc(1 + var(--pcm-enojo) * .02),calc(1 - var(--pcm-enojo) * .02))}' +
-    '80%{transform:translateX(calc(var(--pcm-enojo) * .8%)) scale(1,1)}}' +
-  '@keyframes pcmVena{0%,100%{scale:1}50%{scale:1.14}}' +
+  // carcajada: su amplitud depende de --pcm-risa (0 = quieto, así entra y sale sin saltos)
+  '@keyframes pcmCarcajada{' +
+    '0%,100%{transform:translateY(0) rotate(0) scale(1,1)}' +
+    '25%{transform:translateY(calc(var(--pcm-risa) * -2.5%)) rotate(calc(var(--pcm-risa) * -3deg)) scale(calc(1 - var(--pcm-risa) * .02),calc(1 + var(--pcm-risa) * .03))}' +
+    '50%{transform:translateY(0) rotate(0) scale(calc(1 + var(--pcm-risa) * .04),calc(1 - var(--pcm-risa) * .04))}' +
+    '75%{transform:translateY(calc(var(--pcm-risa) * -2.5%)) rotate(calc(var(--pcm-risa) * 3deg)) scale(calc(1 - var(--pcm-risa) * .02),calc(1 + var(--pcm-risa) * .03))}}' +
+  '@keyframes pcmLagrima{from{transform:translateY(0) scale(1)}to{transform:translateY(12px) scale(1.1)}}' +
+  '@keyframes pcmJa{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.12)}}' +
   '@media (prefers-reduced-motion:reduce){.pc-mascota .pcm-baile{animation-duration:4s}}';
 
   var estilo = document.createElement('style');
@@ -183,7 +185,7 @@
     el.innerHTML =
       '<div class="pcm-sombra"></div>' +
       '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-animo">' +
-        '<img src="' + IMAGEN + '" alt="" draggable="false">' + ENOJO +
+        '<img src="' + IMAGEN + '" alt="" draggable="false">' + RISA +
       '</div></div></div>';
     activarInteraccion(el);
     m.cont.appendChild(el);
@@ -206,24 +208,26 @@
     var baile = nodo.querySelector('.pcm-baile');
     var sombra = nodo.querySelector('.pcm-sombra');
     var id = null, sx = 0, sy = 0, bx = 0, by = 0, movio = false;
-    var ultimoToque = 0, tEnojo = null, tCalma = null, enojada = false;
+    var ultimoToque = 0, tRisa = null, tFinRisa = null, tCalma = null, riendo = false;
 
-    function enojar(){
+    function reir(){
       clearTimeout(tCalma);
-      if (enojada) return;
-      enojada = true;
+      clearTimeout(tFinRisa);
+      tFinRisa = setTimeout(calmar, RISA_MS);   // se le pasa sola a los 2 segundos
+      if (riendo) return;
+      riendo = true;
       detenerSuave(baile); detenerSuave(sombra);
-      nodo.classList.add('enojada');
+      nodo.classList.add('riendo');
     }
     function calmar(){
-      clearTimeout(tEnojo);
-      if (!enojada) return;
-      enojada = false;
-      nodo.classList.remove('enojada');
-      // vuelve a bailar cuando el enojo ya se desvaneció
-      tCalma = setTimeout(function(){ if (!enojada) { reanudar(baile); reanudar(sombra); } }, 420);
+      clearTimeout(tRisa); clearTimeout(tFinRisa);
+      if (!riendo) return;
+      riendo = false;
+      nodo.classList.remove('riendo');
+      // vuelve a bailar cuando la risa ya se desvaneció
+      tCalma = setTimeout(function(){ if (!riendo) { reanudar(baile); reanudar(sombra); } }, 420);
     }
-    nodo._limpiar = function(){ clearTimeout(tEnojo); clearTimeout(tCalma); };
+    nodo._limpiar = function(){ clearTimeout(tRisa); clearTimeout(tFinRisa); clearTimeout(tCalma); };
 
     nodo.addEventListener('pointerdown', function(e){
       if (id !== null) return;
@@ -231,7 +235,7 @@
       var ahora = Date.now();
       if (ahora - ultimoToque < DOBLE_TOQUE_MS) { ultimoToque = 0; quitar(); return; }
       ultimoToque = ahora; movio = false;
-      clearTimeout(tEnojo);
+      clearTimeout(tRisa);
       id = e.pointerId; sx = e.clientX; sy = e.clientY; bx = dx; by = dy;
       try { nodo.setPointerCapture(id); } catch (err) {}
       nodo.classList.add('presionada');
@@ -257,8 +261,8 @@
       id = null;
       nodo.classList.remove('presionada');
       nodo.classList.remove('arrastrando');
-      // un toque sin arrastrar: se enoja (espera un instante por si es doble toque)
-      if (!movio && e.type === 'pointerup') tEnojo = setTimeout(enojar, DOBLE_TOQUE_MS - 60);
+      // un toque sin arrastrar: cosquillas (espera un instante por si es doble toque)
+      if (!movio && e.type === 'pointerup') tRisa = setTimeout(reir, DOBLE_TOQUE_MS - 60);
     }
     nodo.addEventListener('pointerup', soltar);
     nodo.addEventListener('pointercancel', soltar);
