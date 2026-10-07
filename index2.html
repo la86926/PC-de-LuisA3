@@ -4166,6 +4166,7 @@ function load(p){
   state.anaMoves=null; state.anaPtr=0;
   state.viewBack=false; state.liveMoves=null;
 
+stockfishPedido=false;
 mostrarBarraAnalisis(false);
   try{ localStorage.setItem('wp2_ultimo', p.n); }catch(e){}
   anot().lista=[];
@@ -4783,6 +4784,7 @@ function avisarSiMate(){
 }
 
 $('b-edit').onclick=()=>{
+  stockfishPedido=true;
 
   if(motorOn){
     motorOn=false;
@@ -6144,8 +6146,10 @@ function limpiarPremoveVisual() {
 function mostrarBarraAnalisis(visible){
   $('b-ana-prev').style.display = visible ? 'flex' : 'none';
   $('b-ana-next').style.display = visible ? 'flex' : 'none';
-  $('engine-box').style.display=visible?'block':'none';
+  // la sección de Stockfish solo aparece si la pediste con el botón Stockfish
+  $('engine-box').style.display = (visible && stockfishPedido) ? 'block' : 'none';
 }
+var stockfishPedido=false;
 
 var motor=null, motorOn=false, motorPausado=false, fenAnalizado='';
 var motorFallbackUsado=false, motorJsBlobUrl='', motorWasmBlobUrl='';
