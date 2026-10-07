@@ -49,6 +49,20 @@
     '</g>' +
   '</svg>';
 
+  // Notas musicales de fiesta que suben alrededor de la mascota.
+  function nota(color, doble){
+    return doble
+      ? '<svg viewBox="0 0 40 40"><path d="M14 30V9l20-5v21" fill="none" stroke="' + color + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 13l20-5" stroke="' + color + '" stroke-width="5"/><ellipse cx="10" cy="30" rx="6" ry="5" fill="' + color + '"/><ellipse cx="30" cy="25" rx="6" ry="5" fill="' + color + '"/></svg>'
+      : '<svg viewBox="0 0 40 40"><path d="M22 30V6q8 2 10 9" fill="none" stroke="' + color + '" stroke-width="4" stroke-linecap="round"/><ellipse cx="17" cy="30" rx="7" ry="5.5" fill="' + color + '"/></svg>';
+  }
+  var NOTAS = '<div class="pcm-notas" aria-hidden="true">' +
+    '<span class="pcm-nota n1">' + nota('#FF9FB0', false) + '</span>' +
+    '<span class="pcm-nota n2">' + nota('#B9A4F2', true) + '</span>' +
+    '<span class="pcm-nota n3">' + nota('#8CC4EC', false) + '</span>' +
+    '<span class="pcm-nota n4">' + nota('#F5C96A', true) + '</span>' +
+    '<span class="pcm-nota n5">' + nota('#FF9FB0', true) + '</span>' +
+  '</div>';
+
   var CSS = '' +
   '@property --pcm-risa{syntax:"<number>";inherits:true;initial-value:0}' +
   '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both;--pcm-risa:0;transition:--pcm-risa .45s ease}' +
@@ -72,6 +86,15 @@
   '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
   'html[data-modo="oscuro"] .pc-mascota .pcm-globo{background:#2c2c30;color:#f2f2f5;box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}' +
   'html[data-modo="oscuro"] .pc-mascota .pcm-globo:after{border-top-color:#2c2c30}' +
+  '.pc-mascota .pcm-notas{position:absolute;inset:-6% -22% 20% -22%;pointer-events:none}' +
+  '.pc-mascota .pcm-nota{position:absolute;bottom:0;width:22%;max-width:34px;aspect-ratio:1;opacity:0;animation:pcmNotaSube 2.6s ease-out infinite}' +
+  '.pc-mascota .pcm-nota svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.15))}' +
+  '.pc-mascota .pcm-nota.n1{left:2%;animation-delay:0s}' +
+  '.pc-mascota .pcm-nota.n2{right:0;animation-delay:-.55s}' +
+  '.pc-mascota .pcm-nota.n3{left:12%;animation-delay:-1.1s;width:17%}' +
+  '.pc-mascota .pcm-nota.n4{right:10%;animation-delay:-1.65s;width:18%}' +
+  '.pc-mascota .pcm-nota.n5{left:0;animation-delay:-2.1s;width:16%}' +
+  '@keyframes pcmNotaSube{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.6)}15%{opacity:1}50%{transform:translate(10px,-60%) rotate(10deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-6px,-130%) rotate(-8deg) scale(.9)}}' +
   '@keyframes pcmEntrar{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}' +
   '@keyframes pcmSalir{to{opacity:0;transform:scale(.6)}}' +
   '@keyframes pcmBaile{' +
@@ -183,7 +206,7 @@
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', 'Mascota celebrando. Doble toque para cerrarla.');
     el.innerHTML =
-      '<div class="pcm-sombra"></div>' +
+      '<div class="pcm-sombra"></div>' + NOTAS +
       '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-animo">' +
         '<img src="' + IMAGEN + '" alt="" draggable="false">' + RISA +
       '</div></div></div>';
