@@ -249,8 +249,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
     <p class="drawer-note">El progreso de cada método se conserva de forma independiente.</p>
   </aside>
 </div>
-<iframe class="app-frame active" id="app-frame-1" src="index1.html?v=20261007-stockfish" title="PC de L1" allow="autoplay"></iframe>
-<iframe class="app-frame" id="app-frame-2" src="index2.html?v=20261007-stockfish" title="PC de L2" allow="autoplay"></iframe>
+<iframe class="app-frame active" id="app-frame-1" src="index1.html?v=20261007-enlace" title="PC de L1" allow="autoplay"></iframe>
+<iframe class="app-frame" id="app-frame-2" src="index2.html?v=20261007-enlace" title="PC de L2" allow="autoplay"></iframe>
 <script>
 (function(){
   var menuButton=document.getElementById('menu-button');
@@ -732,6 +732,37 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
     estable++;
     if(estable>=3){clearInterval(vigia);abrir(0);}
   },500);
+})();
+</script>
+<script id="pc-enlace-ejercicio">
+/* Enlace directo a un ejercicio: ?metodo=1|2&ejercicio=N
+   Abre el método indicado y lleva al ejercicio. Luego limpia la dirección
+   para que al recargar no vuelva a saltar. */
+(function(){
+  var q, n, m;
+  try{ q=new URLSearchParams(location.search); }catch(e){ return; }
+  n=parseInt(q.get('ejercicio'),10);
+  m=q.get('metodo');
+  if(!(n>0) || (m!=='1' && m!=='2')) return;
+  try{
+    q.delete('ejercicio'); q.delete('metodo');
+    var resto=q.toString();
+    history.replaceState(history.state,'',location.pathname+(resto?'?'+resto:'')+location.hash);
+  }catch(e){}
+  var inicio=Date.now();
+  (function intentar(){
+    var b=document.querySelector('.app-choice[data-app="'+m+'"]');
+    if(b && !b.classList.contains('active')) b.click();
+    var f=document.getElementById('app-frame-'+m), w=null, d=null;
+    try{ w=f&&f.contentWindow; d=w&&w.document; }catch(e){}
+    if(d && d.readyState==='complete' && typeof w.jumpToNumber==='function' && d.getElementById('board')){
+      try{ var tab=d.querySelector('.tab[data-v="train"]'); if(tab && !tab.classList.contains('active')) tab.click(); }catch(e){}
+      try{ w.jumpToNumber(n); }catch(e){}
+      setTimeout(function(){ try{ d.getElementById('board').scrollIntoView({block:'center'}); }catch(e){} },200);
+      return;
+    }
+    if(Date.now()-inicio<20000) setTimeout(intentar,150);
+  })();
 })();
 </script>
 </body>

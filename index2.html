@@ -5353,40 +5353,48 @@ async function crearBlobTableroCompartible(){
   });
 }
 
-async function compartirTablero(){
-  try{
-   const blob=await crearBlobTableroCompartible();
-    const nombre='wp-ejercicio-'+curr().n+'.png';
+function compartirTablero(){
+  const n=curr().n;
+  const enlace=pcEnlaceEjercicio(2,n);
+  const texto='Ejercicio '+n+' · El Método PC 2\nResuélvelo aquí: '+enlace;
+  // el enlace se copia en el mismo toque, por si la app elegida no recibe el texto
+  const copiado=pcCopiarTexto(enlace);
+  return crearBlobTableroCompartible().then(function(blob){
+    const nombre='woodpecker-ejercicio-'+n+'.png';
     if(window.PuenteAndroid && (PuenteAndroid.compartirImagen || PuenteAndroid.guardarImagen)){
-      const lector=new FileReader();
-      lector.onload=()=>{
-        const b64=String(lector.result).split(',')[1];
-        if(PuenteAndroid.compartirImagen)PuenteAndroid.compartirImagen(b64,nombre);
-        else PuenteAndroid.guardarImagen(b64,nombre);
-      };
-      lector.readAsDataURL(blob);
-      return;
-    }
-
-    const archivo=new File([blob],nombre,{type:'image/png'});
-
-    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
-      await navigator.share({
-        files:[archivo],
-        title:'Ejercicio '+curr().n,
-        text:'Comparto esta posición desde El Método PC 2.'
+      return new Promise(function(resolve,reject){
+        const lector=new FileReader();
+        lector.onload=function(){
+          try{
+            const b64=String(lector.result).split(',')[1];
+            if(PuenteAndroid.compartirImagen)PuenteAndroid.compartirImagen(b64,nombre);
+            else PuenteAndroid.guardarImagen(b64,nombre);
+            copiado.then(function(ok){ if(ok) pcAviso('Enlace del ejercicio copiado'); });
+            resolve();
+          }catch(e){reject(e);}
+        };
+        lector.onerror=reject; lector.readAsDataURL(blob);
       });
-
-      setStatus('ok','Compartí la imagen del tablero.');
-    }else{
-      descargarBlob(blob,nombre);
-      setStatus('ok','Se descargó la imagen para que la compartas por WhatsApp o redes.');
     }
-  }catch(err){
+    const archivo=new File([blob],nombre,{type:'image/png'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
+      // imagen + texto con el enlace al ejercicio
+      return navigator.share({files:[archivo],title:'Ejercicio '+n,text:texto})
+        .then(function(){setStatus('ok','Compartí la imagen y el enlace del ejercicio.');});
+    }
+    if(navigator.share){
+      // el navegador no comparte imágenes: descarga la imagen y comparte el enlace
+      descargarBlob(blob,nombre);
+      return navigator.share({title:'Ejercicio '+n,text:texto,url:enlace})
+        .then(function(){setStatus('ok','Compartí el enlace del ejercicio.');});
+    }
+    descargarBlob(blob,nombre);
+    copiado.then(function(ok){ pcAviso(ok?'Imagen descargada · enlace del ejercicio copiado':'Imagen descargada'); });
+    setStatus('ok','Se descargó la imagen y se copió el enlace del ejercicio.');
+  }).catch(function(err){
     if(err && err.name==='AbortError') return;
-    console.error(err);
-    setStatus('no','No pude generar la imagen para compartir.');
-  }
+    console.error(err); setStatus('no','No pude generar la imagen para compartir.');
+  });
 }
 
 $('b-export').onclick=()=>{
@@ -7740,6 +7748,7 @@ window.PCBackupTools=Object.freeze({makeEnvelope,validateEnvelope,checksum:fnv1a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 </script>
+<script src="pc-compartir.js?v=1"></script>
 <script src="pc-mascota.js?v=9"></script>
 </body>
 </html>
