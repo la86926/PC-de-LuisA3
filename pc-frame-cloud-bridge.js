@@ -112,9 +112,10 @@
 
   function refreshExercise(page){
     try{
-      var n=Number(page&&page.lastExercise);
+      // primero el último ejercicio guardado de ESTA sección; la foto de página es el respaldo
+      var n=Number(localStorage.getItem(isL2?'wp2_ultimo':'wp_ultimo'));
       if(!Number.isFinite(n)||n<=0){
-        n=Number(localStorage.getItem(isL2?'wp2_ultimo':'wp_ultimo'));
+        n=Number(page&&page.lastExercise);
       }
       if(Number.isFinite(n)&&n>0&&typeof jumpToNumber==='function'){
         var actual=null;

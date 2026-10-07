@@ -1,6 +1,6 @@
 /* PC · Mascota bailarina
    Aparece bailando sobre el tablero cuando se resuelve un ejercicio.
-   - Pisa el borde inferior del tablero y mide 3 casillas de alto.
+   - Aparece abajo a la derecha, pisando el borde inferior del tablero, y mide 3 casillas de alto.
    - Toca la guitarra al ritmo, con notas musicales alrededor.
    - Un toque: levanta la guitarra con una sola ala (cuadro por cuadro, 4 poses),
      la tiene en alto 1 segundo y la baja por las mismas poses al revés.
@@ -56,18 +56,18 @@
   // cambio de pose instantáneo (cuadro por cuadro): nunca se ven dos poses a la vez
   '.pc-mascota .pcm-pose{opacity:0}' +
   '.pc-mascota[data-pose="0"] .pcm-pose.p0,.pc-mascota[data-pose="1"] .pcm-pose.p1,.pc-mascota[data-pose="2"] .pcm-pose.p2,.pc-mascota[data-pose="3"] .pcm-pose.p3{opacity:1}' +
-  '.pc-mascota .pcm-globo{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(6px) scale(.85);transform-origin:50% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
-  '.pc-mascota .pcm-globo:after{content:"";position:absolute;left:50%;top:100%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}' +
-  '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
+  '.pc-mascota .pcm-globo{position:absolute;right:0;bottom:calc(100% + 10px);transform:translateY(6px) scale(.85);transform-origin:80% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
+  '.pc-mascota .pcm-globo:after{content:"";position:absolute;right:28%;top:100%;margin-right:-7px;border:7px solid transparent;border-top-color:#fff}' +
+  '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateY(0) scale(1)}' +
   'html[data-modo="oscuro"] .pc-mascota .pcm-globo{background:#2c2c30;color:#f2f2f5;box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}' +
   'html[data-modo="oscuro"] .pc-mascota .pcm-globo:after{border-top-color:#2c2c30}' +
-  '.pc-mascota .pcm-notas{position:absolute;inset:-6% -22% 20% -22%;pointer-events:none}' +
+  '.pc-mascota .pcm-notas{position:absolute;inset:-6% 0 20% -40%;pointer-events:none}' +
   '.pc-mascota .pcm-nota{position:absolute;bottom:0;width:22%;max-width:34px;aspect-ratio:1;opacity:0;animation:pcmNotaSube 2.6s ease-out infinite}' +
   '.pc-mascota .pcm-nota svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.15))}' +
   '.pc-mascota .pcm-nota.n1{left:2%;animation-delay:0s}' +
-  '.pc-mascota .pcm-nota.n2{right:0;animation-delay:-.55s}' +
+  '.pc-mascota .pcm-nota.n2{right:2%;animation-delay:-.55s}' +
   '.pc-mascota .pcm-nota.n3{left:12%;animation-delay:-1.1s;width:17%}' +
-  '.pc-mascota .pcm-nota.n4{right:10%;animation-delay:-1.65s;width:18%}' +
+  '.pc-mascota .pcm-nota.n4{left:38%;animation-delay:-1.65s;width:18%}' +
   '.pc-mascota .pcm-nota.n5{left:0;animation-delay:-2.1s;width:16%}' +
   '@keyframes pcmNotaSube{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.6)}15%{opacity:1}50%{transform:translate(10px,-60%) rotate(10deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-6px,-130%) rotate(-8deg) scale(.9)}}' +
   '@keyframes pcmEntrar{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}' +
@@ -116,7 +116,8 @@
     var alto = casilla * ALTO_CASILLAS, ancho = alto * PROPORCION;
     return {
       cont: cont, rb: rb, rc: rc, casilla: casilla, alto: alto, ancho: ancho,
-      x0: rb.left - rc.left + (rb.width - ancho) / 2,
+      // esquina inferior derecha del tablero
+      x0: rb.right - rc.left - ancho,
       y0: rb.bottom - rc.top - alto
     };
   }

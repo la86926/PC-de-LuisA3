@@ -96,7 +96,20 @@ function readPage(scope){
   }catch(e){return {};}
 }
 function captureScope(scope){
-  return {storage:captureStorage(scope),page:readPage(scope)};
+  return {storage:captureStorage(scope),page:readPage(scope),updatedAt:localStamp(scope)||Date.now()};
+}
+/* Cuándo cambió por última vez cada sección (L1 / L2) en ESTE dispositivo.
+   Sirve para que al sincronizar gane siempre el cambio más reciente. */
+const STAMP_PREFIX='pc_cloud_sync_ts_';
+function localStamp(scope){
+  try{const n=Number(localStorage.getItem(STAMP_PREFIX+scope));return Number.isFinite(n)?n:0;}catch(e){return 0;}
+}
+function setLocalStamp(scope,value){
+  try{localStorage.setItem(STAMP_PREFIX+scope,String(value));}catch(e){}
+}
+function remoteStamp(part){
+  const n=Number(part&&part.updatedAt);
+  return Number.isFinite(n)?n:0;
 }
 function captureProfile(){
   return {l1:captureScope('l1'),l2:captureScope('l2')};
@@ -159,7 +172,7 @@ function injectBridge(frame){
     if(!docu||!docu.head||docu.getElementById('pc-cloud-frame-bridge'))return;
     const script=docu.createElement('script');
     script.id='pc-cloud-frame-bridge';
-    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=3';
+    script.src=new URL('pc-frame-cloud-bridge.js',location.href).href+'?v=4';
     docu.head.appendChild(script);
   }catch(e){}
 }
@@ -186,14 +199,25 @@ function resetFrames(){
   callBridge('app-frame-2',null,'reset');
 }
 
-async function applyRemote(data){
+async function applyRemote(data,force){
   if(!data||typeof data!=='object')return;
   applyingRemote=true;
   clearTimeout(uploadTimer);
+  const keepPending=new Set(pendingScopes);
   pendingScopes.clear();
+  // Una sección se toma de la nube solo si allí es más reciente que en este dispositivo
+  // (o si la persona acaba de escribir su código para recuperar el avance).
+  const usar={};
+  ['l1','l2'].forEach(scope=>{
+    const local=localStamp(scope), remoto=remoteStamp(data[scope]);
+    usar[scope]=!!data[scope]&&(force||!local||remoto>local);
+  });
+  const subirDespues=['l1','l2'].filter(scope=>!usar[scope]&&(keepPending.has(scope)||localStamp(scope)>remoteStamp(data[scope])));
   try{
-    const c1=applyStorage('l1',data.l1&&data.l1.storage);
-    const c2=applyStorage('l2',data.l2&&data.l2.storage);
+    const c1=usar.l1?applyStorage('l1',data.l1.storage):[];
+    const c2=usar.l2?applyStorage('l2',data.l2.storage):[];
+    if(usar.l1)setLocalStamp('l1',remoteStamp(data.l1)||Date.now());
+    if(usar.l2)setLocalStamp('l2',remoteStamp(data.l2)||Date.now());
     const changed=[...new Set(c1.concat(c2))];
 
     const active=localStorage.getItem('pc_l3_active_app');
@@ -202,11 +226,19 @@ async function applyRemote(data){
       if(button&&!button.classList.contains('active'))button.click();
     }
 
-    callBridge('app-frame-1',{page:(data.l1&&data.l1.page)||{},changedKeys:changed});
-    callBridge('app-frame-2',{page:(data.l2&&data.l2.page)||{},changedKeys:changed});
+    if(usar.l1)callBridge('app-frame-1',{page:(data.l1&&data.l1.page)||{},changedKeys:changed});
+    if(usar.l2)callBridge('app-frame-2',{page:(data.l2&&data.l2.page)||{},changedKeys:changed});
     setStatus('Sincronizado','ok');
   }finally{
-    setTimeout(()=>{applyingRemote=false;},650);
+    setTimeout(()=>{
+      applyingRemote=false;
+      // lo de este dispositivo era más nuevo: se sube para que la nube quede al día
+      if(subirDespues.length&&currentRef){
+        subirDespues.forEach(scope=>pendingScopes.add(scope));
+        clearTimeout(uploadTimer);
+        uploadTimer=setTimeout(pushPending,200);
+      }
+    },650);
   }
 }
 
@@ -219,8 +251,10 @@ function setStatus(text,state){
   if(line){line.className='pc-sync-statusline '+statusState;line.innerHTML='<i></i><span>'+escapeHtml(statusText)+'</span>';}
 }
 
-function queueUpload(scope){
-  if(!currentRef||applyingRemote||!scope)return;
+function queueUpload(scope,marcar){
+  if(applyingRemote||!scope)return;
+  if(marcar!==false)setLocalStamp(scope,Date.now());
+  if(!currentRef)return;
   pendingScopes.add(scope);
   clearTimeout(uploadTimer);
   setStatus('Guardando…','busy');
@@ -271,7 +305,7 @@ function startListening(){
 }
 
 async function refFor(code){return doc(db,COLLECTION,codeId(code));}
-async function connectExisting(code,snapshot){
+async function connectExisting(code,snapshot,force){
   code=cleanCode(code);
   const ref=await refFor(code);
   const snap=snapshot||await getDoc(ref);
@@ -281,7 +315,7 @@ async function connectExisting(code,snapshot){
   currentCode=code;
   currentRef=ref;
   try{localStorage.setItem(SYNC_CODE_KEY,currentCode);}catch(e){}
-  await applyRemote(snap.data());
+  await applyRemote(snap.data(),!!force);
   startListening();
   closeModal();
   setStatus('Sincronizado','ok');
@@ -338,7 +372,7 @@ async function switchCode(code){
   currentCode=code;
   currentRef=ref;
   try{localStorage.setItem(SYNC_CODE_KEY,currentCode);}catch(e){}
-  await applyRemote(snap.data());
+  await applyRemote(snap.data(),true);
   startListening();
   closeModal();
 }
@@ -418,7 +452,7 @@ function showCodeModal(prefill=''){
     try{
       const ref=await refFor(code);
       const snap=await getDoc(ref);
-      if(snap.exists())await connectExisting(code,snap);else showNewCodeChoice(code);
+      if(snap.exists())await connectExisting(code,snap,true);else showNewCodeChoice(code);
     }catch(e){message(msg,e&&e.message?e.message:'No se pudo conectar.','error');go.disabled=false;}
   };
   go.onclick=submit;
@@ -493,7 +527,8 @@ function installChangeWatchers(){
   window.addEventListener('storage',e=>{
     if(applyingRemote||!e||!e.key)return;
     const scope=scopeForKey(e.key);
-    if(scope)queueUpload(scope);
+    // la foto de página se guarda sola al cargar: se sube, pero no cuenta como cambio de la persona
+    if(scope)queueUpload(scope,e.key!==PAGE1_KEY&&e.key!==PAGE2_KEY);
   });
   document.addEventListener('click',e=>{
     if(!currentRef||applyingRemote)return;
@@ -501,7 +536,7 @@ function installChangeWatchers(){
     if(e.target.closest&&e.target.closest('#tema button'))setTimeout(()=>queueUpload('l1'),10);
   },true);
   window.addEventListener('pagehide',()=>{
-    if(currentRef&&!applyingRemote){pendingScopes.add('l1');pendingScopes.add('l2');pushPending();}
+    if(currentRef&&!applyingRemote&&pendingScopes.size){clearTimeout(uploadTimer);pushPending();}
   });
 }
 
