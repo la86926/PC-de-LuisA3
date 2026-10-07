@@ -1973,6 +1973,7 @@ html[data-modo="claro"],html[data-modo="oscuro"]{
 <style id="pc-ajustes-cabecera-css">
 #status{display:none!important}
 @media(max-width:600px){.boardhead-center{align-self:start}}
+.engine-banner-toggle,.engine-banner-toggle:hover,.engine-banner-toggle[aria-pressed]{color:var(--gold);border-color:var(--gold);background:var(--tinte-oro)}
 </style>
 </head>
 <body>
@@ -2050,7 +2051,7 @@ html[data-modo="claro"],html[data-modo="oscuro"]{
 
     <div class="status" id="status"><span class="ico">♟</span><span id="statustext">Encuentra la mejor jugada.</span></div>
 
-    <div class="actions pc-fila-controles">
+    <div class="actions pc-fila-controles" id="pc-fila-controles">
       <button class="btn btn-icono" id="b-hint" type="button" aria-label="Pista" title="Pista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c.7.7 1 1.5 1 2h6c0-.5.3-1.3 1-2a6 6 0 0 0-4-10z"/></svg></button>
       <button class="btn" id="b-sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>Solución</button>
       <button class="btn" id="b-flip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v16M7 4l-3 4M7 4l3 4M17 20V4M17 20l3-4M17 20l-3-4"/></svg>Girar</button>
@@ -7784,6 +7785,6 @@ window.PCBackupTools=Object.freeze({makeEnvelope,validateEnvelope,checksum:fnv1a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 </script>
-<script src="pc-mascota.js?v=5"></script>
+<script src="pc-mascota.js?v=6"></script>
 </body>
 </html>

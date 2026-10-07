@@ -203,6 +203,7 @@
     dx = 0; dy = 0;
     el = document.createElement('div');
     el.className = 'pc-mascota';
+    el.id = 'pc-mascota';
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', 'Mascota celebrando. Doble toque para cerrarla.');
     el.innerHTML =
