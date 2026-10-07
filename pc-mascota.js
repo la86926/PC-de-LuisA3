@@ -2,7 +2,8 @@
    Aparece bailando sobre el tablero cuando se resuelve un ejercicio.
    - Pisa el borde inferior del tablero y mide 3 casillas de alto.
    - Toca la guitarra al ritmo, con notas musicales alrededor.
-   - Un toque: levanta la guitarra con una sola ala durante 1 segundo y vuelve a tocar.
+   - Un toque: levanta la guitarra con una sola ala (cuadro por cuadro, 4 poses),
+     la tiene en alto 1 segundo y la baja por las mismas poses al revés.
    - Si la arrastras mientras la tiene arriba, la baja enseguida.
    - Doble toque: se cierra. La primera vez avisa con un globo de 2 segundos.
    - Desaparece al cargar otro ejercicio (siguiente, anterior, reiniciar). */
@@ -12,8 +13,9 @@
   window.__pcMascota = true;
 
   var ALTO_CASILLAS = 3;
-  var IMAGEN_TOCA = 'mascota.png';        // tocando la guitarra
-  var IMAGEN_ROCK = 'mascota-rock.png';   // guitarra en alto
+  // Poses en orden: tocando → subiendo → casi arriba → guitarra en alto
+  var POSES = ['mascota.png', 'mascota-sube1.png', 'mascota-sube2.png', 'mascota-rock.png'];
+  var CUADRO_MS = 85;                     // tiempo entre una pose y la siguiente
   // Caja del personaje (de la cresta a las patitas). Las dos imágenes comparten
   // el mismo recorte y sobresalen de la caja para que quepa la guitarra en alto.
   var PROPORCION = 949 / 1016;
@@ -51,11 +53,9 @@
   '.pc-mascota .pcm-salto.salta{animation:pcmLevanta .5s ease-in-out}' +
   '.pc-mascota .pcm-animo{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmCelebra .5s ease-in-out infinite}' +
   '.pc-mascota .pcm-pose{position:absolute;left:-12.223%;top:-14.567%;width:114.226%;height:114.567%;max-width:none;display:block;pointer-events:none;-webkit-user-drag:none}' +
-  // cambio de pose: la que entra aparece primero y la que sale se va después, sin transparencias raras
-  '.pc-mascota .pcm-pose.toca{opacity:1;transition:opacity .16s ease .12s}' +
-  '.pc-mascota .pcm-pose.rock{opacity:0;transition:opacity .12s ease .26s}' +
-  '.pc-mascota.rockera .pcm-pose.toca{opacity:0;transition:opacity .12s ease .26s}' +
-  '.pc-mascota.rockera .pcm-pose.rock{opacity:1;transition:opacity .16s ease .12s}' +
+  // cambio de pose instantáneo (cuadro por cuadro): nunca se ven dos poses a la vez
+  '.pc-mascota .pcm-pose{opacity:0}' +
+  '.pc-mascota[data-pose="0"] .pcm-pose.p0,.pc-mascota[data-pose="1"] .pcm-pose.p1,.pc-mascota[data-pose="2"] .pcm-pose.p2,.pc-mascota[data-pose="3"] .pcm-pose.p3{opacity:1}' +
   '.pc-mascota .pcm-globo{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(6px) scale(.85);transform-origin:50% 100%;opacity:0;pointer-events:none;white-space:nowrap;padding:8px 13px;border-radius:16px;background:#fff;color:#3a3a40;font:600 13px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);transition:opacity .28s ease,transform .32s cubic-bezier(.34,1.56,.64,1)}' +
   '.pc-mascota .pcm-globo:after{content:"";position:absolute;left:50%;top:100%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}' +
   '.pc-mascota .pcm-globo.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}' +
@@ -99,7 +99,7 @@
   (document.head || document.documentElement).appendChild(estilo);
 
   // precarga para que aparezca al instante
-  [IMAGEN_TOCA, IMAGEN_ROCK].forEach(function(src){ var i = new Image(); i.src = src; });
+  POSES.forEach(function(src){ var i = new Image(); i.src = src; });
 
   var el = null;      // nodo de la mascota
   var dx = 0, dy = 0; // desplazamiento por arrastre, en casillas
@@ -179,13 +179,13 @@
     el = document.createElement('div');
     el.className = 'pc-mascota';
     el.id = 'pc-mascota';
+    el.setAttribute('data-pose', '0');
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', 'Mascota celebrando. Doble toque para cerrarla.');
     el.innerHTML =
       '<div class="pcm-sombra"></div>' + NOTAS +
       '<div class="pcm-baile"><div class="pcm-presion"><div class="pcm-salto"><div class="pcm-animo">' +
-        '<img class="pcm-pose toca" src="' + IMAGEN_TOCA + '" alt="" draggable="false">' +
-        '<img class="pcm-pose rock" src="' + IMAGEN_ROCK + '" alt="" draggable="false">' +
+        POSES.map(function(src, i){ return '<img class="pcm-pose p' + i + '" src="' + src + '" alt="" draggable="false">'; }).join('') +
       '</div></div></div></div>';
     activarInteraccion(el);
     m.cont.appendChild(el);
@@ -209,12 +209,23 @@
     var sombra = nodo.querySelector('.pcm-sombra');
     var id = null, sx = 0, sy = 0, bx = 0, by = 0, movio = false;
     var salto = nodo.querySelector('.pcm-salto');
-    var ultimoToque = 0, tSubir = null, tBajar = null, tReanudar = null, arriba = false;
+    var ultimoToque = 0, tSubir = null, tBajar = null, tReanudar = null, tCuadro = null, arriba = false;
+    var pose = 0, ULTIMA = POSES.length - 1;
 
     function impulso(){
       salto.classList.remove('salta');
       void salto.offsetWidth;
       salto.classList.add('salta');
+    }
+    // Avanza una pose por cuadro hasta llegar a la pose pedida (sube o baja desde donde esté)
+    function irAPose(destino, alLlegar){
+      clearTimeout(tCuadro);
+      (function paso(){
+        if (pose === destino) { if (alLlegar) alLlegar(); return; }
+        pose += destino > pose ? 1 : -1;
+        nodo.setAttribute('data-pose', String(pose));
+        tCuadro = setTimeout(paso, CUADRO_MS);
+      })();
     }
     function subir(){
       clearTimeout(tReanudar); clearTimeout(tBajar);
@@ -222,9 +233,11 @@
         arriba = true;
         detenerSuave(baile); detenerSuave(sombra);
         nodo.classList.add('rockera');
+        impulso();
       }
-      impulso();
-      tBajar = setTimeout(bajar, 260 + ARRIBA_MS);   // 1 segundo con la guitarra en alto
+      irAPose(ULTIMA, function(){
+        tBajar = setTimeout(bajar, ARRIBA_MS);    // 1 segundo con la guitarra en alto
+      });
     }
     function bajar(){
       clearTimeout(tSubir); clearTimeout(tBajar);
@@ -232,10 +245,12 @@
       arriba = false;
       nodo.classList.remove('rockera');
       impulso();
-      // vuelve a tocar cuando terminó de bajar la guitarra
-      tReanudar = setTimeout(function(){ if (!arriba) { reanudar(baile); reanudar(sombra); } }, 520);
+      irAPose(0, function(){
+        // vuelve a tocar cuando terminó de bajar la guitarra
+        tReanudar = setTimeout(function(){ if (!arriba) { reanudar(baile); reanudar(sombra); } }, 260);
+      });
     }
-    nodo._limpiar = function(){ clearTimeout(tSubir); clearTimeout(tBajar); clearTimeout(tReanudar); };
+    nodo._limpiar = function(){ clearTimeout(tSubir); clearTimeout(tBajar); clearTimeout(tReanudar); clearTimeout(tCuadro); };
 
     nodo.addEventListener('pointerdown', function(e){
       if (id !== null) return;
