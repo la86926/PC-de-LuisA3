@@ -50,7 +50,13 @@
 
   var CSS = '' +
   '.pc-mascota{position:absolute;z-index:40;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transform-origin:50% 100%;animation:pcmEntrar .38s cubic-bezier(.34,1.56,.64,1) both}' +
+  '.pc-mascota,.pc-mascota *{-webkit-tap-highlight-color:transparent;outline:none}' +
   '.pc-mascota.arrastrando{cursor:grabbing}' +
+  '.pc-mascota .pcm-cerrar{position:absolute;top:2%;right:-4%;width:40px;height:40px;margin:0;padding:0;border:0;background:none;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;touch-action:manipulation}' +
+  '.pc-mascota .pcm-cerrar span{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.88);border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 6px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#55555c;transition:transform .15s}' +
+  '.pc-mascota .pcm-cerrar:active span{transform:scale(.88)}' +
+  '.pc-mascota .pcm-cerrar svg{width:12px;height:12px}' +
+  'html[data-modo="oscuro"] .pc-mascota .pcm-cerrar span{background:rgba(44,44,48,.9);border-color:rgba(255,255,255,.16);color:#d8d8de}' +
   '.pc-mascota.saliendo{animation:pcmSalir .22s ease-in both;pointer-events:none}' +
   '.pc-mascota .pcm-sombra{position:absolute;left:18%;right:18%;bottom:-3%;height:8%;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(2px);animation:pcmSombra 2s ease-in-out infinite}' +
   '.pc-mascota .pcm-baile{position:absolute;inset:0;transform-origin:50% 100%;animation:pcmBaile 2s ease-in-out infinite}' +
@@ -158,17 +164,32 @@
     var dibujo = usarImagen
       ? '<img src="' + IMAGEN + '" alt="" draggable="false">'
       : SVG;
-    el.innerHTML = '<div class="pcm-sombra"></div><div class="pcm-baile">' + dibujo + '</div>';
+    el.innerHTML = '<div class="pcm-sombra"></div><div class="pcm-baile">' + dibujo + '</div>' +
+      '<button type="button" class="pcm-cerrar" aria-label="Cerrar mascota"><span>' +
+      '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg>' +
+      '</span></button>';
+    activarCerrar(el.querySelector('.pcm-cerrar'));
     activarArrastre(el);
     m.cont.appendChild(el);
     colocar();
   }
 
+  function activarCerrar(boton){
+    // el botón no inicia el arrastre ni llega al tablero
+    ['pointerdown','pointermove','mousedown','touchstart'].forEach(function(t){
+      boton.addEventListener(t, function(e){ e.stopPropagation(); }, { passive: true });
+    });
+    boton.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); quitar(); });
+  }
+
   function activarArrastre(nodo){
-    var id = null, sx = 0, sy = 0, bx = 0, by = 0;
+    var id = null, sx = 0, sy = 0, bx = 0, by = 0, ultimoToque = 0, movio = false;
     nodo.addEventListener('pointerdown', function(e){
       if (id !== null) return;
       e.preventDefault(); e.stopPropagation();
+      var ahora = Date.now();
+      if (ahora - ultimoToque < 320) { ultimoToque = 0; quitar(); return; } // doble toque: cerrar
+      ultimoToque = ahora; movio = false;
       id = e.pointerId; sx = e.clientX; sy = e.clientY; bx = dx; by = dy;
       try { nodo.setPointerCapture(id); } catch (err) {}
       nodo.classList.add('arrastrando');
@@ -177,6 +198,7 @@
       if (e.pointerId !== id) return;
       e.preventDefault(); e.stopPropagation();
       var m = medidas(); if (!m) return;
+      if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 8) { movio = true; ultimoToque = 0; }
       dx = bx + (e.clientX - sx) / m.casilla;
       dy = by + (e.clientY - sy) / m.casilla;
       colocar();
