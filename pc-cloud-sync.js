@@ -440,7 +440,7 @@ function message(el,text,type=''){
 }
 
 function showCodeModal(prefill=''){
-  openModal(head('Código de sincronización','Un solo código guardará PC de L1 y PC de L2.')+`
+  openModal(head('Código de sincronización','Un solo código guardará el Método PC1 y el Método PC2.')+`
     <label class="pc-sync-field"><span>CÓDIGO</span><input id="pc-sync-code-input" class="pc-sync-input" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32" placeholder="Ej. Luis09" value="${escapeHtml(prefill)}"></label>
     <div class="pc-sync-row"><button id="pc-sync-generate" class="pc-sync-btn" type="button">Generar código</button><button id="pc-sync-continue" class="pc-sync-btn primary" type="button">Continuar</button></div>
     <p class="pc-sync-note">Solo letras y números. Un código largo es más difícil de adivinar.</p><div id="pc-sync-msg" class="pc-sync-msg"></div>`);
@@ -502,7 +502,7 @@ function copyCode(){
 }
 
 function showSettings(){
-  openModal(head('Sincronización','Un perfil para PC de L1 y PC de L2.')+`
+  openModal(head('Sincronización','Un perfil para el Método PC1 y el Método PC2.')+`
     <div class="pc-sync-section"><h4>Código activo</h4><div class="pc-sync-code">${escapeHtml(currentCode||'Sin código')}</div><div id="pc-sync-live-status" class="pc-sync-statusline ${statusState}"><i></i><span>${escapeHtml(statusText)}</span></div><div class="pc-sync-row" style="margin-top:12px"><button id="pc-sync-copy" class="pc-sync-btn" type="button">Copiar código</button></div><div id="pc-sync-copy-msg" class="pc-sync-msg"></div></div>
     <div class="pc-sync-sep"></div>
     <div class="pc-sync-section"><h4>Cambiar a otro código existente</h4><label class="pc-sync-field"><input id="pc-sync-switch-input" class="pc-sync-input" autocomplete="off" maxlength="32" placeholder="Código existente"></label><button id="pc-sync-switch" class="pc-sync-btn primary" style="width:100%" type="button">Cambiar código</button><div id="pc-sync-switch-msg" class="pc-sync-msg"></div></div>

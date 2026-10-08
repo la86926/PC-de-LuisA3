@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0F1411">
-<title>PC de L1 y L2</title>
+<title>Método PC1 y PC2</title>
 <link rel="icon" type="image/png" href="torre.png">
 <script>
 /* Fija la apariencia antes del primer pintado. Lee localStorage y, si no hay, cookie. */
@@ -23,7 +23,7 @@
 </script>
 <style>
 /* ==================================================================
-   PC de L1 y L2 · selector de método
+   Método PC1 y PC2 · selector de método
    Mismo sistema de diseño que index1 e index2: mismos tokens,
    mismas formas, mismo interruptor de apariencia.
    ================================================================== */
@@ -236,21 +236,21 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Elegir aplicación">
     <div class="drawer-brand">
       <img src="torre.png" alt="Ajedrez">
-      <div><strong>PC de L1 y L2</strong><small>Dos métodos en una aplicación</small></div>
+      <div><strong>Método PC1 y PC2</strong><small>Dos métodos en una aplicación</small></div>
     </div>
     <div class="tema" id="tema" role="group" aria-label="Apariencia">
       <button type="button" data-modo="claro" aria-pressed="false" title="Claro" aria-label="Apariencia: Claro"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.1"/><path d="M12 3.2v2.1M12 18.7v2.1M3.2 12h2.1M18.7 12h2.1M5.9 5.9l1.5 1.5M16.6 16.6l1.5 1.5M18.1 5.9l-1.5 1.5M7.4 16.6l-1.5 1.5"/></svg><span class="sr">Claro</span></button>
       <button type="button" data-modo="oscuro" aria-pressed="false" title="Oscuro" aria-label="Apariencia: Oscuro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 13.1A8.3 8.3 0 1 1 11 3.2a6.6 6.6 0 0 0 9.8 9.9z"/></svg><span class="sr">Oscuro</span></button>
       <button type="button" data-modo="sistema" aria-pressed="false" title="Como el sistema" aria-label="Apariencia: Como el sistema"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.8" width="17.6" height="11.6" rx="1.7"/><path d="M8.6 19.6h6.8"/></svg><span class="sr">Sistema</span></button>
     </div>
-    <button class="app-choice active" data-app="1" type="button"><span>PC de L1<br><small>Ejercicios tácticos</small></span></button>
-    <button class="app-choice" data-app="2" type="button"><span>PC de L2<br><small>Ejercicios posicionales</small></span></button>
+    <button class="app-choice active" data-app="1" type="button"><span>Método PC1<br><small>Ejercicios tácticos</small></span></button>
+    <button class="app-choice" data-app="2" type="button"><span>Método PC2<br><small>Ejercicios posicionales</small></span></button>
     <button class="drawer-tuto" id="drawer-tuto" type="button">Ver tutorial</button>
     <p class="drawer-note">El progreso de cada método se conserva de forma independiente.</p>
   </aside>
 </div>
-<iframe class="app-frame active" id="app-frame-1" src="index1.html?v=20261007-ejercicio" title="PC de L1" allow="autoplay"></iframe>
-<iframe class="app-frame" id="app-frame-2" src="index2.html?v=20261007-ejercicio" title="PC de L2" allow="autoplay"></iframe>
+<iframe class="app-frame active" id="app-frame-1" src="index1.html?v=20261008-nombres" title="Método PC1" allow="autoplay"></iframe>
+<iframe class="app-frame" id="app-frame-2" src="index2.html?v=20261008-nombres" title="Método PC2" allow="autoplay"></iframe>
 <script>
 (function(){
   var menuButton=document.getElementById('menu-button');
@@ -554,7 +554,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
     </div>
   </section>
 </div>
-<script type="module" src="pc-cloud-sync.js?v=4"></script>
+<script type="module" src="pc-cloud-sync.js?v=5"></script>
 <script>
 /* ==================================================================
    Tutorial de bienvenida
@@ -579,13 +579,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);c
   var abierto=false,paso=0,reloj=null,vigia=null,estable=0;
 
   var PASOS=[
-    {titulo:'Bienvenido a PC de L1 y L2',texto:'Dos métodos de ajedrez en una sola app. En menos de un minuto te muestro qué tocar.',modo:'saludo'},
-    {titulo:'Elige tu método',texto:'Con este botón abres el menú y cambias entre PC de L1 (ejercicios tácticos) y PC de L2 (ejercicios posicionales).',padre:'menu-button',modo:'toque'},
+    {titulo:'Bienvenido al Método PC1 y PC2',texto:'Dos métodos de ajedrez en una sola app. En menos de un minuto te muestro qué tocar.',modo:'saludo'},
+    {titulo:'Elige tu método',texto:'Con este botón abres el menú y cambias entre el Método PC1 (ejercicios tácticos) y el Método PC2 (ejercicios posicionales).',padre:'menu-button',modo:'toque'},
     {titulo:'¿Quién juega?',texto:'Aquí ves el número del ejercicio, su dificultad y qué bando mueve: «Juegan: Blancas» o «Juegan: Negras».',app:'toplay',modo:'toque'},
     {titulo:'Juega sobre el tablero',texto:'Toca una de tus piezas y arrástrala, o toca la casilla de destino. Si es la jugada correcta, el rival responde solo.',app:'board',modo:'arrastre'},
     {titulo:'Más espacio',texto:'«Ocultar» esconde el encabezado de arriba para que el tablero tenga más espacio. «Mostrar» lo vuelve a poner.',app:'b-banner',modo:'toque'},
-    {titulo:'Analiza con Stockfish',texto:'El botón del chip enciende Stockfish, el motor de ajedrez: te da la evaluación de la posición y la mejor línea.',app:'b-edit',modo:'toque'},
-    {titulo:'Tus botones',texto:'💡 ilumina la pieza que debes mover, «Solución» reproduce la línea completa, «Girar» voltea el tablero, el parlante activa o silencia el sonido, el libro abre la explicación y el último botón comparte la posición.',app:'pc-fila-controles',modo:'toque'},
+    {titulo:'Analiza con Stockfish',texto:'El botón del chip enciende Stockfish, el motor de ajedrez: solo entonces aparecen la evaluación de la posición y la mejor línea. A su lado, «Flechas» te deja dibujar flechas sobre el tablero.',app:'b-edit',modo:'toque'},
+    {titulo:'Tus botones',texto:'💡 ilumina la pieza que debes mover, «Solución» reproduce la línea completa, «Girar» voltea el tablero, el parlante activa o silencia el sonido, el libro abre la explicación y el último botón comparte la imagen del ejercicio con su enlace, para que quien lo toque llegue directo a ese ejercicio.',app:'pc-fila-controles',modo:'toque'},
     {titulo:'Tu mascota',texto:'Cada vez que resuelves un ejercicio aparece tocando guitarra sobre el tablero. Arrástrala con el dedo para moverla, tócala y levantará su guitarra como estrella de rock, y dale doble toque para cerrarla.',app:'pc-mascota',mascota:true,modo:'toque'},
     {titulo:'Tu entrenamiento',texto:'Aquí ves tu meta diaria, tu racha y el cuaderno de errores para repasar los ejercicios que te costaron.',app:'b-gift',modo:'toque'},
     {titulo:'Tu código de progreso',texto:'Este botón guarda tu avance en la nube con tu código. En otro dispositivo, escribe el mismo código y recuperas todo.',padre:'pc-sync-fab',modo:'toque'},
