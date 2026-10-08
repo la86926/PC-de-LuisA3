@@ -35,6 +35,24 @@
     '.pc-aviso.ver{opacity:1;transform:translateX(-50%) translateY(0)}';
   (document.head || document.documentElement).appendChild(css);
   var nodo = null, reloj = null;
+  /* Los avisos de acciones (importar, exportar, copiar, pegar, tarjeta, copias de seguridad)
+     se veían en el recuadro de mensajes, que ahora está oculto: se muestran como aviso breve.
+     Los mensajes del juego (correcto, incorrecto, pista…) siguen sin mostrarse. */
+  var ACCIONES = /(export|import|copia|copiad|pegad|portapapeles|tarjeta|progreso|historial|\bpgn\b|\bfen\b|donde pegar)/i;
+  function engancharAvisos(){
+    if (typeof window.setStatus !== 'function' || window.setStatus.__pcAviso) return;
+    var original = window.setStatus;
+    var envuelto = function(tipo, texto){
+      var r = original.apply(this, arguments);
+      try{ if (texto && ACCIONES.test(String(texto))) window.pcAviso(String(texto)); }catch(e){}
+      return r;
+    };
+    envuelto.__pcAviso = true;
+    window.setStatus = envuelto;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', engancharAvisos, { once: true });
+  else engancharAvisos();
+
   window.pcAviso = function(texto){
     if (!nodo){ nodo = document.createElement('div'); nodo.className = 'pc-aviso'; nodo.setAttribute('role', 'status'); document.body.appendChild(nodo); }
     nodo.textContent = texto;

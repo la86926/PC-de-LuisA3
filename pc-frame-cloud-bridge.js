@@ -2,6 +2,10 @@
   'use strict';
 
   var file=(location.pathname.split('/').pop()||'').toLowerCase();
+  // Solo trabaja dentro de L1 (index1.html) o L2 (index2.html). Si el navegador lo
+  // cargara antes de tiempo en la página vacía inicial del marco, no hace nada.
+  if(file!=='index1.html'&&file!=='index2.html')return;
+  if(window.PCCloudFrameBridge&&window.PCCloudFrameBridge.file===file)return;
   var isL2=file==='index2.html';
   var ownPrefix=isL2?'wp2_':'wp_';
   var lastApply=0;
@@ -125,7 +129,7 @@
     }catch(e){}
   }
 
-  function refreshRuntime(page){
+  function refreshRuntime(page,desdeNube){
     try{ solved=loadSolved(); }catch(e){}
     try{ solvedAt=loadSolvedAt(); }catch(e){}
     try{ histLog=loadHistLog(); }catch(e){}
@@ -142,8 +146,12 @@
       }
     }catch(e){}
 
-    try{ if(typeof applyPageState==='function') applyPageState(); }catch(e){}
-    refreshExercise(page);
+    // Solo la nube (cuando trae algo más nuevo) puede llevarte a otro ejercicio.
+    // Los cambios guardados por otras pestañas no te mueven del ejercicio en el que estás.
+    if(desdeNube){
+      try{ if(typeof applyPageState==='function') applyPageState(); }catch(e){}
+      refreshExercise(page);
+    }
 
     try{ if(typeof renderProgress==='function') renderProgress(); }catch(e){}
     try{ if(typeof renderHistorial==='function') renderHistorial(); }catch(e){}
@@ -194,7 +202,7 @@
     payload=payload||{};
     lastApply=Date.now();
     dispatchStorage(payload.changedKeys||[]);
-    refreshRuntime(payload.page||pageState());
+    refreshRuntime(payload.page||pageState(),true);
     try{window.dispatchEvent(new CustomEvent('pc-cloud-state-applied',{detail:{file:file}}));}catch(e){}
   }
 

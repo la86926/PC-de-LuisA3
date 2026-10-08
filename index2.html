@@ -91,7 +91,8 @@ try{
     if(snapRaw){
       var snap=JSON.parse(snapRaw);
       if(snap&&Number.isFinite(Number(snap.lastExercise))&&Number(snap.lastExercise)>0){
-        localStorage.setItem(f==='index2.html'?'wp2_ultimo':'wp_ultimo',String(Number(snap.lastExercise)));
+        var kU=f==='index2.html'?'wp2_ultimo':'wp_ultimo';
+        if(!(Number(localStorage.getItem(kU))>0)) localStorage.setItem(kU,String(Number(snap.lastExercise)));
       }
     }
   }
@@ -4169,6 +4170,7 @@ function load(p){
 stockfishPedido=false;
 mostrarBarraAnalisis(false);
   try{ localStorage.setItem('wp2_ultimo', p.n); }catch(e){}
+  try{ sessionStorage.setItem('pc_tab_ultimo_l2', p.n); }catch(e){}
   anot().lista=[];
   renderHead(p); renderBoard(); renderMoves(); renderRef(p);
 
@@ -5357,7 +5359,7 @@ var compartirCache=null;
 function compartirTablero(){
   const n=curr().n;
   const enlace=pcEnlaceEjercicio(2,n);
-  const texto='Ejercicio '+n+' · El Método PC 2\nResuélvelo aquí: '+enlace;
+  const texto='Ejercicio '+n+' · El Método PC 2\n\n'+enlace;
   const nombre='woodpecker-ejercicio-'+n+'.png';
   const clave=n+'|'+(state.game?state.game.fen():'')+'|'+state.orient;
 
@@ -6149,7 +6151,8 @@ if(navigator.storage && navigator.storage.persist){ navigator.storage.persist();
 document.addEventListener('gesturestart', e=>e.preventDefault());
 document.addEventListener('dblclick', e=>e.preventDefault());
 $('c-all').textContent = PUZZLES.length;
-const ultimo=parseInt(localStorage.getItem('wp2_ultimo'),10);
+let ultimoPestana=NaN;try{ultimoPestana=parseInt(sessionStorage.getItem('pc_tab_ultimo_l2'),10);}catch(e){}
+const ultimo=ultimoPestana>0?ultimoPestana:parseInt(localStorage.getItem('wp2_ultimo'),10);
 const idxU=ultimo?state.list.findIndex(p=>p.n===ultimo):-1;
 if(idxU>=0){ state.i=idxU; }
 load(curr());
@@ -7694,7 +7697,7 @@ function findControl(desc){if(!desc)return null;if(desc.id){const el=document.ge
 function currentOrient(){try{if(typeof state!=='undefined'&&state&&(state.orient==='w'||state.orient==='b'))return state.orient;}catch(e){}return null;}
 function applyPageState(){
   const snap=readPageState();if(!snap||!snap.runtime)return;const rt=snap.runtime;
-  try{if(rt.filter!=null){const f=Array.from(document.querySelectorAll('.fbtn[data-f]')).find(el=>el.getAttribute('data-f')===String(rt.filter));if(f&&!f.classList.contains('active'))f.click();}}catch(e){}
+  try{if(rt.filter!=null){const f=Array.from(document.querySelectorAll('.fbtn[data-f]')).find(el=>el.getAttribute('data-f')===String(rt.filter));if(f&&!f.classList.contains('active')){const n=currentExerciseNumber();f.click();if(n&&typeof jumpToNumber==='function'&&curr()&&curr().n!==n)jumpToNumber(n);}}}catch(e){}
   try{if(rt.activeControl){const c=findControl(rt.activeControl);if(c&&!c.classList.contains('active'))c.click();}}catch(e){}
   try{if((rt.orient==='w'||rt.orient==='b')){const now=currentOrient();const b=document.getElementById('b-flip');if(now&&now!==rt.orient&&b)b.click();}}catch(e){}
 }
@@ -7763,7 +7766,7 @@ window.PCBackupTools=Object.freeze({makeEnvelope,validateEnvelope,checksum:fnv1a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 </script>
-<script src="pc-compartir.js?v=2"></script>
+<script src="pc-compartir.js?v=3"></script>
 <script src="pc-mascota.js?v=9"></script>
 </body>
 </html>
